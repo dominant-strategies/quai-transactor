@@ -56,7 +56,7 @@ const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 9000
 let feeData, memPoolSize, transactions = 0
 let latest
-let interval = 700
+let interval = 1000
 
 let desiredTps = 40
 
