@@ -53,7 +53,7 @@ const hiValue = 100
 const chainId = 15000
 const etxFreq = .2
 const provider = new JsonRpcProvider(providerUrl)
-const memPoolMax = 9000
+const memPoolMax = 3000
 let feeData, memPoolSize, transactions = 0
 let latest
 let interval = 1000
@@ -242,7 +242,7 @@ async function transact(wallet) {
         const raw = await genRawTransaction(wallet)
         const signed = await wallet.signTransaction(raw)
         if (memPoolSize < memPoolMax) await sendRawTransaction(providerUrl, signed)
-        else console.log('mempool full')
+        else console.log(Date.now() + 'mempool full')
         await sleep(interval)
     }
 }
@@ -263,6 +263,9 @@ async function transact(wallet) {
 
     setInterval(async () => {
         memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
+        if (memPoolSize > memPoolMax) console.log(Date.now() + 'mempool full')
+
+
     }, 3000)
 
     setInterval(async () => {
@@ -274,7 +277,7 @@ async function transact(wallet) {
         } else {
             interval += 10
         }
-        console.log(`tps: ${tps}, desiredTps: ${desiredTps}`)
+        console.log(`${Date.now()} tps: ${tps}, desiredTps: ${desiredTps}`)
     }, 30000)
 
     setInterval(async () => {
