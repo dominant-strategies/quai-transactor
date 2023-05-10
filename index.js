@@ -52,7 +52,8 @@ const hiValue = 100
 
 const chainId = 1337
 const etxFreq = .2
-const provider = new JsonRpcProvider(providerUrl) // using let so it is globally scoped
+const provider = new JsonRpcProvider(providerUrl)
+let feeData = 0
 
 async function sendRawTransaction(url, signedHexValue) {
     try {
@@ -72,7 +73,6 @@ async function sendRawTransaction(url, signedHexValue) {
 
 async function genRawTransaction(wallet) {
     const nonce = await provider.getTransactionCount(wallet.address, 'pending')
-    const feeData = await provider.getFeeData()
     const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue);
     const isExternal = Math.random() > etxFreq
 
@@ -221,7 +221,11 @@ async function transact(wallet) {
 
 ;(async () => {
     const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
+    feeData = await provider.getFeeData()
 
     const start = Date.now()
+    setInterval(async () => {
+        feeData = await provider.getFeeData()
+    }, 1000)
     await Promise.map(wallets, async (wallet) => transact(wallet))
 })()
