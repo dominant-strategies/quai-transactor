@@ -43,9 +43,9 @@ const nodeData = {
 }
 
 const host = 'localhost'
-const selectedGroup = 'group-0'
-const selectedZone = 'zone-0-0'
 const protocol = 'http'
+const selectedGroup = process.argv[2]
+const selectedZone =  process.argv[3]
 const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
 const hiValue = 100
@@ -53,9 +53,16 @@ const hiValue = 100
 const chainId = 1337
 const etxFreq = .2
 const provider = new JsonRpcProvider(providerUrl)
-let feeData = 0
+const memPoolMax = 9000
+let feeData, memPoolSize, transactions = 0
+let latest
+let interval = 700
+
+let desiredTps = 40
+
 
 async function sendRawTransaction(url, signedHexValue) {
+    transactions++
     try {
         const result = await post(url, {
             jsonrpc: "2.0",
@@ -64,13 +71,32 @@ async function sendRawTransaction(url, signedHexValue) {
             id: 1,
         });
         if (result.data.error) {
-            console.log("Error: ", result.data.error.message);
+            console.log("Error1: ", result.data.error.message);
         }
     } catch (error) {
-        console.log("Error: ", error.message)
+        console.log("Error2: ", error.message)
     }
 }
 
+async function lookupTxPending(url) {
+    try {
+        const result = await post(url, {
+            jsonrpc: "2.0",
+            method: "txpool_status",
+            id: 1,
+        });
+        if (result.data.error) {
+            console.log("Error1: ", result.data.error.message);
+            return 0;
+        }
+        const resPend = result.data.result.pending;
+        const resQueued = result.data.result.queued;
+        return [ Number(resPend), Number(resQueued) ];
+    } catch (error) {
+        console.log("Error2: ", error);
+        return 0;
+    }
+}
 async function genRawTransaction(wallet) {
     const nonce = await provider.getTransactionCount(wallet.address, 'pending')
     const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue);
@@ -215,20 +241,46 @@ async function transact(wallet) {
     while (true) {
         const raw = await genRawTransaction(wallet)
         const signed = await wallet.signTransaction(raw)
-        await sendRawTransaction(providerUrl, signed)
-        await sleep(1000)
+        if (memPoolSize < memPoolMax) await sendRawTransaction(providerUrl, signed)
+        else console.log('mempool full')
+        await sleep(interval)
     }
 }
 
 ;(async () => {
+    console.log(`selectedGroup: ${selectedGroup}, selectedZone: ${selectedZone}`)
+
     const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
     feeData = await provider.getFeeData()
+    memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
 
     const start = Date.now()
+    latest = start
 
     setInterval(async () => { // continually update feeData
         feeData = await provider.getFeeData()
     }, 10000)
+
+    setInterval(async () => {
+        memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
+    }, 3000)
+
+    setInterval(async () => {
+        const tps = transactions / ((Date.now() - latest) / 1000)
+        transactions = 0
+        latest = Date.now()
+        if (tps < desiredTps) {
+            interval -= 10
+        } else {
+            interval += 10
+        }
+        console.log(`tps: ${tps}, desiredTps: ${desiredTps}`)
+    }, 30000)
+
+    setInterval(async () => {
+        desiredTps += 200
+        if (desiredTps > 1600) desiredTps = 1600
+    }, 1000 * 60 * 60 * 4)
 
     await Promise.map(wallets, async (wallet) => transact(wallet))
 })()
