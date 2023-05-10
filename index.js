@@ -111,6 +111,7 @@ async function genRawTransaction(wallet) {
 function sleep(s) {
     return new Promise((resolve) => setTimeout(resolve, s));
 }
+
 // Generate a random Ethereum address
 function generateRandomAddress() {
     const hexChars = '0123456789abcdef';
@@ -128,7 +129,7 @@ function generateRandomAddress() {
 function getRandomAddressInShard(shard) {
     const start = Number(shard.byte[0])
     const end = Number(shard.byte[1])
-    let prefix =  Math.floor(Math.random() * (end - start + 1) + start).toString(16)
+    let prefix = Math.floor(Math.random() * (end - start + 1) + start).toString(16)
     // if prefix is only 1 character, add a 0 to the front
     if (prefix.length === 1) {
         prefix = "0" + prefix
@@ -224,8 +225,10 @@ async function transact(wallet) {
     feeData = await provider.getFeeData()
 
     const start = Date.now()
-    setInterval(async () => {
+
+    setInterval(async () => { // continually update feeData
         feeData = await provider.getFeeData()
-    }, 1000)
+    }, 10000)
+
     await Promise.map(wallets, async (wallet) => transact(wallet))
 })()
