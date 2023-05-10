@@ -50,7 +50,7 @@ const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
 const hiValue = 100
 
-const chainId = 1337
+const chainId = 15000
 const etxFreq = .2
 const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 9000
