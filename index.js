@@ -100,7 +100,7 @@ async function lookupTxPending(url) {
 async function genRawTransaction(wallet) {
     const nonce = await provider.getTransactionCount(wallet.address, 'pending')
     const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue);
-    const isExternal = Math.random() > etxFreq
+    const isExternal = Math.random() < etxFreq
 
     let to, type
 
