@@ -94,7 +94,7 @@ const memPoolMax = 9000
 let memPoolSize; let transactions = 0
 let latest
 let interval = 4000
-let desiredTps = 40 / 6
+let desiredTps = 60 / 6
 async function sendRawTransaction (url, signedHexValue) {
   try {
     const result = await post(url, {
@@ -310,7 +310,7 @@ async function transact (wallet) {
 
   setInterval(async () => {
     desiredTps += 3.33
-    if (desiredTps > 26) desiredTps = 26
+    if (desiredTps > 50) desiredTps = 50
   }, 1000 * 60 * 60 * 4)
 
   await Promise.map(wallets, async (wallet) => transact(wallet))
