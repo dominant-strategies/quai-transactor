@@ -6,7 +6,7 @@ const { post } = require('axios')
 const winston = require('winston')
 
 const customFormat = winston.format.printf(({ level, message, timestamp, ...metadata }) => {
-  let msg = `[${level.toUpperCase()}] [${formatDate(new Date(timestamp))}] ${message} `
+  let msg = `${level.toUpperCase()} [${formatDate(new Date(timestamp))}] ${message} `
   for (const key in metadata) {
     msg += `${key}:= ${metadata[key]} `
   }
@@ -104,7 +104,7 @@ async function sendRawTransaction (url, signedHexValue) {
       id: 1
     })
     if (result.data.error) {
-      logger.error('Error1: ', result.data.error.message)
+      logger.error('Error1: ', result.data.error)
     } else {
       transactions++
     }
@@ -121,7 +121,7 @@ async function lookupTxPending (url) {
       id: 1
     })
     if (result.data.error) {
-      logger.error('Error1: ', result.data.error.message)
+      logger.error('Error1: ', result.data.error)
       return 0
     }
     const resPend = result.data.result.pending
@@ -305,7 +305,7 @@ async function transact (wallet) {
     } else {
       interval += 10
     }
-    logger.info(`${Date.now()} tps: ${tps}, desiredTps: ${desiredTps}`)
+    logger.info(`tps: ${tps}, desiredTps: ${desiredTps}`)
   }, 30000)
 
   setInterval(async () => {
