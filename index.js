@@ -89,12 +89,12 @@ const hiValue = 100
 const chainId = 15000
 const etxFreq = 0.2
 const provider = new JsonRpcProvider(providerUrl)
-const memPoolMax = 1000
+const memPoolMax = 9000
 
 let memPoolSize; let transactions = 0
 let latest
-let interval = 1000
-let desiredTps = 40
+let interval = 8000
+let desiredTps = 40 / 6
 async function sendRawTransaction (url, signedHexValue) {
   try {
     const result = await post(url, {
@@ -301,7 +301,7 @@ async function transact (wallet) {
     transactions = 0
     latest = Date.now()
     if (tps < desiredTps) {
-      interval -= 10
+      interval -= 10 // should be based on desiredTps - tps
     } else {
       interval += 10
     }
@@ -309,8 +309,8 @@ async function transact (wallet) {
   }, 30000)
 
   setInterval(async () => {
-    desiredTps += 200
-    if (desiredTps > 1600) desiredTps = 1600
+    desiredTps += 3.33
+    if (desiredTps > 26) desiredTps = 26
   }, 1000 * 60 * 60 * 4)
 
   await Promise.map(wallets, async (wallet) => transact(wallet))
