@@ -53,11 +53,11 @@ const hiValue = 100
 const chainId = 15000
 const etxFreq = .2
 const provider = new JsonRpcProvider(providerUrl)
-const memPoolMax = 3000
+const memPoolMax = 1000
+
 let feeData, memPoolSize, transactions = 0
 let latest
 let interval = 1000
-
 let desiredTps = 40
 
 
