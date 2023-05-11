@@ -91,7 +91,7 @@ const etxFreq = 0.2
 const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 1000
 
-let feeData; let memPoolSize; let transactions = 0
+let memPoolSize; let transactions = 0
 let latest
 let interval = 1000
 let desiredTps = 40
@@ -134,7 +134,7 @@ async function lookupTxPending (url) {
 }
 
 async function genRawTransaction (wallet) {
-  const nonce = await provider.getTransactionCount(wallet.address, 'pending')
+  const [feeData, nonce] = await Promise.all([provider.getFeeData(), provider.getTransactionCount(wallet.address, 'pending')])
   const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   const isExternal = Math.random() < etxFreq
 
@@ -286,15 +286,10 @@ async function transact (wallet) {
   logger.info('Starting QUAI load test', selectedShard.shard, selectedGroup)
 
   const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
-  feeData = await provider.getFeeData()
   memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
 
   const start = Date.now()
   latest = start
-
-  setInterval(async () => { // continually update feeData
-    feeData = await provider.getFeeData()
-  }, 10000)
 
   setInterval(async () => {
     memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
