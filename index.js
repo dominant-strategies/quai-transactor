@@ -242,7 +242,6 @@ async function transact(wallet) {
         const raw = await genRawTransaction(wallet)
         const signed = await wallet.signTransaction(raw)
         if (memPoolSize < memPoolMax) await sendRawTransaction(providerUrl, signed)
-        else console.log(Date.now() + 'mempool full')
         await sleep(interval)
     }
 }
