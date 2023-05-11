@@ -296,17 +296,23 @@ async function transact (wallet) {
     if (memPoolSize > memPoolMax) logger.warn('mempool full')
   }, 3000)
 
+  let integralError = 0;
+  const proportionalGain = 0.1; // These are tuning parameters that you'll need to adjust for your use case
+  const integralGain = 0.01;
+
   setInterval(async () => {
-    const tps = transactions / ((Date.now() - latest) / 1000)
-    transactions = 0
-    latest = Date.now()
-    if (tps < desiredTps) {
-      interval -= 10 // should be based on desiredTps - tps
-    } else {
-      interval += 10
+    const tps = transactions / ((Date.now() - latest) / 1000);
+    transactions = 0;
+    latest = Date.now();
+    const error = desiredTps - tps; // Calculate the error
+    integralError += error; // Accumulate the error over time
+    const controllerOutput = proportionalGain * error + integralGain * integralError; // PI controller output
+    interval -= controllerOutput; // Use controller output to adjust interval
+    if (interval < 0) { // Ensure interval never goes below 0
+      interval = 0;
     }
-    logger.info(`tps: ${tps}, desiredTps: ${desiredTps}`)
-  }, 30000)
+    logger.info(`tps: ${tps}, desiredTps: ${desiredTps}, interval: ${interval}`);
+  }, 30000);
 
   setInterval(async () => {
     desiredTps += 3.33
