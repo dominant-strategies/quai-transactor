@@ -93,7 +93,7 @@ const memPoolMax = 9000
 
 let memPoolSize; let transactions = 0
 let latest
-let interval = 8000
+let interval = 4000
 let desiredTps = 40 / 6
 async function sendRawTransaction (url, signedHexValue) {
   try {
