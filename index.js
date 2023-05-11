@@ -93,8 +93,9 @@ const memPoolMax = 9000
 
 let memPoolSize; let transactions = 0
 let latest
-let interval = 2000
-let desiredTps = 80 / 6
+let interval = 4000
+let desiredTps = 40 / 6
+let feeData
 async function sendRawTransaction (url, signedHexValue) {
   try {
     const result = await post(url, {
@@ -133,8 +134,7 @@ async function lookupTxPending (url) {
   }
 }
 
-async function genRawTransaction (wallet) {
-  const [feeData, nonce] = await Promise.all([provider.getFeeData(), provider.getTransactionCount(wallet.address, 'pending')])
+async function genRawTransaction (wallet, nonce) {
   const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   const isExternal = Math.random() < etxFreq
 
@@ -274,11 +274,17 @@ const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZ
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
 
 async function transact (wallet) {
+  let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   while (true) {
-    const raw = await genRawTransaction(wallet)
+    const raw = await genRawTransaction(wallet, nonce)
     const signed = await wallet.signTransaction(raw)
     if (memPoolSize < memPoolMax) await sendRawTransaction(providerUrl, signed)
     await sleep(interval)
+    if (nonce % 100 === 0) {
+      nonce = await provider.getTransactionCount(wallet.address, 'pending')
+    } else {
+      nonce++
+    }
   }
 }
 
@@ -287,6 +293,7 @@ async function transact (wallet) {
 
   const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
   memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
+  feeData = await provider.getFeeData()
 
   const start = Date.now()
   latest = start
@@ -313,6 +320,10 @@ async function transact (wallet) {
     }
     logger.info(`tps: ${tps}, desiredTps: ${desiredTps}, interval: ${interval}`);
   }, 30000);
+
+  setInterval(async () => {
+    feeData = await provider.getFeeData()
+  }, 1000*30)
 
   setInterval(async () => {
     desiredTps += 3.33
