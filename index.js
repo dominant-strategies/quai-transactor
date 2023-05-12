@@ -27,10 +27,12 @@ const memPoolMax = 9000
 let memPoolSize
 let transactions = 0
 let latest
-let interval = 4000
+let interval = 10000
 let feeData
 const intervalArray = [2980, 1980, 1480, 1180, 1010, 878, 781]
 let intervalIndex = 0
+let walletStart = 0
+let walletEnd = 80
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
@@ -103,7 +105,7 @@ async function transact(wallet) {
 ;(async () => {
     info('Starting QUAI load test', {shard: selectedShard.shard, selectedGroup})
 
-    const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
+    const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart,walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
     feeData = await provider.getFeeData()
 
@@ -119,7 +121,7 @@ async function transact(wallet) {
         const tps = transactions / ((Date.now() - latest) / 1000)
         transactions = 0
         latest = Date.now()
-        info('tps check', {tps, interval})
+        info('tps check', {tps, walletEnd})
     }, 1000 * 30)
 
     setInterval(async () => {
@@ -127,9 +129,10 @@ async function transact(wallet) {
     }, 1000 * 30)
 
     setInterval(async () => {
-        interval = intervalArray[intervalIndex]
-        intervalIndex++
-        if (intervalIndex >= intervalArray.length) intervalIndex = intervalArray.length - 1
+        const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart,walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+        walletStart = walletEnd
+        walletEnd += 40
+        await Promise.map(newWallets, transact)
     }, 1000 * 60 * 60 * 1)
 
     await Promise.map(wallets, transact)
