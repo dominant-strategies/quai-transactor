@@ -274,7 +274,7 @@ async function transact(wallet) {
 }
 
 ;(async () => {
-    logger.info('Starting QUAI load test', selectedShard.shard, selectedGroup)
+    logger.info('Starting QUAI load test', {shard: selectedShard.shard, selectedGroup})
 
     const wallets = walletsJson[selectedGroup][selectedZone].map((wallet) => new Wallet(wallet.privateKey, provider))
     memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
@@ -297,7 +297,7 @@ async function transact(wallet) {
         } else {
             interval += 10
         }
-        logger.info(`tps: ${tps}, desiredTps: ${desiredTps}, interval: ${interval}`);
+        logger.info('tps check', {tps, desiredTps, interval})
     }, 1000 * 30);
 
     setInterval(async () => {
@@ -309,5 +309,5 @@ async function transact(wallet) {
         if (desiredTps > 50) desiredTps = 50
     }, 1000 * 60 * 60 * 1)
 
-    await Promise.map(wallets, async (wallet) => transact(wallet))
+    await Promise.map(wallets, transact)
 })()
