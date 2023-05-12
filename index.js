@@ -2,6 +2,7 @@ const Promise = require('bluebird')
 const {JsonRpcProvider, Wallet} = require('quais')
 const walletsJson = require('./wallets.json')
 const {post} = require('axios')
+const crypto = require('crypto')
 
 const winston = require('winston')
 
@@ -100,6 +101,7 @@ let feeData
 
 async function sendRawTransaction(url, signedHexValue) {
     try {
+        transactions++
         const result = await post(url, {
             jsonrpc: '2.0',
             method: 'quai_sendRawTransaction',
@@ -108,8 +110,6 @@ async function sendRawTransaction(url, signedHexValue) {
         })
         if (result.data.error) {
             logger.error('Error1: ', result.data.error)
-        } else {
-            transactions++
         }
     } catch (error) {
         logger.error('Error2: ', error.message)
@@ -124,15 +124,13 @@ async function lookupTxPending(url) {
             id: 1
         })
         if (result.data.error) {
-            logger.error('Error1: ', result.data.error)
-            return 0
+            logger.error('lookupTxPending Error1: ', result.data.error)
         }
         const resPend = result.data.result.pending
         const resQueued = result.data.result.queued
         return [Number(resPend), Number(resQueued)]
     } catch (error) {
-        logger.error('Error2: ', error)
-        return 0
+        logger.error('lookupTxPending Error2: ', error)
     }
 }
 
@@ -155,19 +153,15 @@ async function genRawTransaction(wallet, nonce) {
         value,
         nonce,
         gasLimit: 42000,
-        maxFeePerGas: feeData.maxPriorityFeePerGas * BigInt(2),
+        maxFeePerGas: feeData.maxFeePerGas * BigInt(2),
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         type,
         chainId
     }
     if (isExternal) { // is external this time
         ret.externalGasLimit = BigInt(100000)
-        ret.externalGasPrice = BigInt(
-            Number(feeData.maxFeePerGas) * 2
-        )
-        ret.externalGasTip = BigInt(
-            Number(feeData.maxPriorityFeePerGas) * 2
-        )
+        ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2)
+        ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2)
     }
     return ret
 }
@@ -175,19 +169,8 @@ async function genRawTransaction(wallet, nonce) {
 function sleep(s) {
     return new Promise((resolve) => setTimeout(resolve, s))
 }
-
-// Generate a random Ethereum address
 function generateRandomAddress() {
-    const hexChars = '0123456789abcdef'
-    let address = '0x'
-
-    // Generate 40 random hexadecimal characters
-    for (let i = 0; i < 40; i++) {
-        const randomIndex = Math.floor(Math.random() * 16)
-        address += hexChars[randomIndex]
-    }
-
-    return address
+    return `0x${crypto.randomBytes(20).toString('hex')}`
 }
 
 function getRandomAddressInShard(shard) {
@@ -303,7 +286,7 @@ async function transact(wallet) {
     setInterval(async () => {
         memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
         if (memPoolSize > memPoolMax) logger.warn('mempool full')
-    }, 3000)
+    }, 1000 * 3)
 
     setInterval(async () => {
         const tps = transactions / ((Date.now() - latest) / 1000);
@@ -315,11 +298,11 @@ async function transact(wallet) {
             interval += 10
         }
         logger.info(`tps: ${tps}, desiredTps: ${desiredTps}, interval: ${interval}`);
-    }, 30000);
+    }, 1000 * 30);
 
     setInterval(async () => {
         feeData = await provider.getFeeData()
-    }, 1000 * 30)
+    },  1000 * 30)
 
     setInterval(async () => {
         desiredTps += 3.33
