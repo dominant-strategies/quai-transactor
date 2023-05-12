@@ -1,7 +1,7 @@
 const Promise = require('bluebird')
 const {JsonRpcProvider, Wallet} = require('quais')
 const walletsJson = require('./wallets.json')
-const {info, warn} = require('./logger')
+const {info, warn, error} = require('./logger')
 const {
     getRandomAddressInShard,
     lookupTxPending,
@@ -82,7 +82,14 @@ async function transact(wallet) {
         const signed = await wallet.signTransaction(raw)
         if (memPoolSize < memPoolMax) {
             transactions++
-            await sendRawTransaction(providerUrl, signed)
+            try {
+                await sendRawTransaction(providerUrl, signed)
+            } catch (e) {
+                error(e)
+                nonce = await provider.getTransactionCount(wallet.address, 'pending')
+                feeData = await provider.getFeeData()
+                continue
+            }
         }
         await sleep(interval)
         if (nonce % 100 === 0) {
