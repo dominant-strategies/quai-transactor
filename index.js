@@ -106,14 +106,14 @@ async function transact(wallet) {
     info('Starting QUAI load test', {shard: selectedShard.shard, selectedGroup})
 
     const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart,walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-    memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
+    memPoolSize = (await lookupTxPending(providerUrl))[0]
     feeData = await provider.getFeeData()
 
     const start = Date.now()
     latest = start
 
     setInterval(async () => {
-        memPoolSize = Math.max(...(await lookupTxPending(providerUrl)))
+        memPoolSize = (await lookupTxPending(providerUrl))[0]
         if (memPoolSize > memPoolMax) warn('mempool full')
     }, 1000 * 3)
 
