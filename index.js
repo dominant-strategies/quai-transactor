@@ -87,7 +87,7 @@ async function transact(wallet) {
             try {
                 await sendRawTransaction(providerUrl, signed)
             } catch (e) {
-                error(e)
+                error("error sending transaction", e)
                 nonce = await provider.getTransactionCount(wallet.address, 'pending')
                 feeData = await provider.getFeeData()
                 continue

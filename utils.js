@@ -122,7 +122,7 @@ async function sendRawTransaction (url, signedHexValue) {
       params: [signedHexValue],
       id: 1
     })
-    if (result.data?.error) throw new Error(result.data.error)
+    if (result.data?.error) throw new Error(JSON.stringify(result.data.error, null, 2))
 }
 
 function generateRandomAddress () {
