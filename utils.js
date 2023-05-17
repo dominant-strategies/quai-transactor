@@ -116,13 +116,13 @@ async function lookupTxPending (url) {
   }
 }
 async function sendRawTransaction (url, signedHexValue) {
-    const result = await post(url, {
-      jsonrpc: '2.0',
-      method: 'quai_sendRawTransaction',
-      params: [signedHexValue],
-      id: 1
-    })
-    if (result.data?.error) throw new Error(JSON.stringify(result.data.error, null, 2))
+  const result = await post(url, {
+    jsonrpc: '2.0',
+    method: 'quai_sendRawTransaction',
+    params: [signedHexValue],
+    id: 1
+  })
+  if (result.data?.error) throw new Error(JSON.stringify(result.data.error, null, 2))
 }
 
 function generateRandomAddress () {
