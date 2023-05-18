@@ -29,8 +29,8 @@ let transactions = 0
 let latest
 const interval = 10000
 let feeData
-let walletStart = 0
-let walletEnd = 80
+const walletStart = 0
+const walletEnd = 80
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
@@ -76,6 +76,7 @@ async function genRawTransaction (wallet, nonce) {
 }
 
 async function transact (wallet) {
+  await sleep(5000 * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   while (true) {
     const raw = await genRawTransaction(wallet, nonce)
@@ -83,24 +84,22 @@ async function transact (wallet) {
     if (memPoolSize < memPoolMax) {
       transactions++
       try {
+        info('sending transaction', { memPoolSize, nonce, ...feeData, address: wallet.address })
         await sendRawTransaction(providerUrl, signed)
       } catch (e) {
         error('error sending transaction', e)
-        nonce = await provider.getTransactionCount(wallet.address, 'pending')
-        feeData = await provider.getFeeData()
-        continue
+        if (!['replacement transaction underpriced', 'nonce too low'].contains(e.message)) {
+          await sleep(interval)
+          continue
+        }
       }
-    }
-    await sleep(interval)
-    if (nonce % 100 === 0) {
-      nonce = await provider.getTransactionCount(wallet.address, 'pending')
-    } else {
       nonce++
     }
+    await sleep(interval)
   }
 }
 
-;(async () => {
+; (async () => {
   info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
 
   const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
