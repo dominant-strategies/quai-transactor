@@ -30,7 +30,7 @@ let latest
 const interval = 10000
 let feeData
 let walletStart = 0
-let walletEnd = 120
+let walletEnd = 160
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
