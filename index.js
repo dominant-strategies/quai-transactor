@@ -126,9 +126,9 @@ async function transact (wallet) {
   }, 1000 * 30)
 
   setInterval(async () => {
-    const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     walletStart = walletEnd
     walletEnd += 40
+    const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     await Promise.map(newWallets, transact)
   }, 1000 * 60 * 60 * 1)
 
