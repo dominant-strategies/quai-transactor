@@ -30,7 +30,7 @@ let latest
 const interval = 10000
 let feeData
 let walletStart = 0
-let walletEnd = 80
+let walletEnd = 160
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
@@ -130,7 +130,7 @@ async function transact (wallet) {
     walletEnd += 40
     const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     await Promise.map(newWallets, transact)
-  }, 1000 * 60 * 60 * 2)
+  }, 1000 * 60 * 60 * 1)
 
   await Promise.map(wallets, transact)
 })()
