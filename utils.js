@@ -129,7 +129,7 @@ function generateRandomAddress () {
   return `0x${crypto.randomBytes(20).toString('hex')}`
 }
 
-function getRandomAddressInShard (shard) {
+function generateRandomAddressInShard (shard) {
   const start = Number(shard.byte[0])
   const end = Number(shard.byte[1])
   let prefix = Math.floor(Math.random() * (end - start + 1) + start).toString(16)
@@ -151,7 +151,7 @@ function sleep (s) {
 }
 
 module.exports = {
-  getRandomAddressInShard,
+  generateRandomAddressInShard,
   lookupTxPending,
   nodeData,
   sleep,

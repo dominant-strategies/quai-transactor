@@ -3,7 +3,7 @@ const { JsonRpcProvider, Wallet } = require('quais')
 const walletsJson = require('./wallets.json')
 const { info, warn, error } = require('./logger')
 const {
-  getRandomAddressInShard,
+  generateRandomAddressInShard,
   lookupTxPending,
   nodeData,
   sleep,
@@ -32,15 +32,26 @@ let feeData
 let walletStart = 0
 let walletEnd = 160
 
+const generateAbsoluteRandomRatio = 0
+
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
 
 function getRandomExternalAddress () {
-  return getRandomAddressInShard(externalShards[Math.floor(Math.random() * externalShards.length)])
+  const randomZone = externalShards[Math.floor(Math.random() * externalShards.length)]
+  if (Math.random() < generateAbsoluteRandomRatio) {
+    return generateRandomAddressInShard(randomZone)
+  }
+  const addresses = walletsJson[selectedGroup][randomZone.shard].slice(walletStart, walletEnd).map((wallet) => wallet.address)
+  return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
 function getRandomInternalAddress () {
-  return getRandomAddressInShard(selectedShard)
+  if (Math.random() < generateAbsoluteRandomRatio) {
+    return generateRandomAddressInShard(selectedShard)
+  }
+  const addresses = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => wallet.address)
+  return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
 async function genRawTransaction (wallet, nonce) {
