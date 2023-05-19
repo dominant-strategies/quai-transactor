@@ -130,7 +130,7 @@ async function transact (wallet) {
     walletEnd += 40
     const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     await Promise.map(newWallets, transact)
-  }, 1000 * 60 * 60 * 1)
+  }, 1000 * 60 * 60 * 2)
 
   await Promise.map(wallets, transact)
 })()
