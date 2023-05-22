@@ -22,7 +22,7 @@ const hiValue = 100
 const chainId = 15000
 const etxFreq = 0.2
 const provider = new JsonRpcProvider(providerUrl)
-const memPoolMax = 9000
+const memPoolMax = 4096
 
 let memPoolSize
 let transactions = 0
