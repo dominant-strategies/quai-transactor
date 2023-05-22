@@ -11,10 +11,10 @@ const {
   QUAI_CONTEXTS
 } = require('./utils')
 
-const host = 'localhost'
 const protocol = 'http'
 const selectedGroup = process.argv[2]
 const selectedZone = process.argv[3]
+const host = process.argv?.[4] || 'localhost'
 const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
 const hiValue = 100
