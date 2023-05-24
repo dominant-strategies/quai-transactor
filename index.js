@@ -12,8 +12,8 @@ const {
 } = require('./utils')
 
 const protocol = 'http'
-const selectedGroup = process.argv[2]
-const selectedZone = process.argv[3]
+const selectedGroup = process.argv?.[2]  || 'group-0'
+const selectedZone = process.argv?.[3] || 'zone-0-0'
 const host = process.argv?.[4] || 'localhost'
 const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
@@ -29,8 +29,8 @@ let transactions = 0
 let latest
 const interval = 10000
 let feeData
-let walletStart = 0
-let walletEnd = 160
+const walletStart = 0
+const walletEnd = 1
 
 const generateAbsoluteRandomRatio = 0
 
@@ -89,28 +89,24 @@ async function genRawTransaction (wallet, nonce) {
 async function transact (wallet) {
   await sleep(5000 * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
-  while (true) {
-    const raw = await genRawTransaction(wallet, nonce)
-    const signed = await wallet.signTransaction(raw)
-    if (memPoolSize < memPoolMax) {
-      transactions++
-      try {
-        info('sending transaction', { memPoolSize, nonce, ...feeData, address: wallet.address })
-        await sendRawTransaction(providerUrl, signed)
-      } catch (e) {
-        error('error sending transaction', e)
-        if (!['replacement transaction underpriced', 'nonce too low'].contains(e.message)) {
-          await sleep(interval)
-          continue
-        }
+  const raw = await genRawTransaction(wallet, nonce)
+  const signed = await wallet.signTransaction(raw)
+  if (memPoolSize < memPoolMax) {
+    transactions++
+    try {
+      info('sending transaction', { memPoolSize, nonce, ...feeData, address: wallet.address })
+      await sendRawTransaction(providerUrl, signed)
+    } catch (e) {
+      error('error sending transaction', e)
+      if (!['replacement transaction underpriced', 'nonce too low'].contains(e.message)) {
+        await sleep(interval)
       }
-      nonce++
     }
-    await sleep(interval)
+    nonce++
   }
 }
 
-; (async () => {
+;(async () => {
   info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
 
   const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
@@ -135,13 +131,6 @@ async function transact (wallet) {
   setInterval(async () => {
     feeData = await provider.getFeeData()
   }, 1000 * 30)
-
-  setInterval(async () => {
-    walletStart = walletEnd
-    walletEnd += 40
-    const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-    await Promise.map(newWallets, transact)
-  }, 1000 * 60 * 60 * 1)
 
   await Promise.map(wallets, transact)
 })()
