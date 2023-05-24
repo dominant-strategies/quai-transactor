@@ -20,7 +20,7 @@ const loValue = 1
 const hiValue = 100
 
 const chainId = 15000
-const etxFreq = 0.2
+const etxFreq = 0
 const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 4096
 
