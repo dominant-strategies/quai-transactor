@@ -31,6 +31,7 @@ const interval = 10000
 let feeData
 let walletStart = 0
 let walletEnd = 160
+const numberOfNewWallets = 40
 
 const generateAbsoluteRandomRatio = 0
 
@@ -117,6 +118,10 @@ async function transact(wallet) {
 
 ;(async () => {
     info('Starting QUAI load test', {shard: selectedShard.shard, selectedGroup})
+    if (walletEnd > walletsJson[selectedGroup][selectedZone].length) {
+        walletEnd = walletsJson[selectedGroup][selectedZone].length
+        info('walletEnd is greater than the number of wallets in the group, setting walletEnd to the number of wallets in the group', {walletEnd})
+    }
 
     const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
     memPoolSize = (await lookupTxPending(providerUrl))[0]
@@ -142,10 +147,12 @@ async function transact(wallet) {
     }, 1000 * 30)
 
     setInterval(async () => {
-        walletStart = walletEnd
-        walletEnd += 40
-        const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-        await Promise.map(newWallets, transact)
+	if (walletEnd + numberOfNewWallets <= walletsJson[selectedGroup][selectedZone].length) {
+          walletStart = walletEnd
+          walletEnd += numberOfNewWallets
+          const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+          await Promise.map(newWallets, transact)
+	}
     }, 1000 * 60 * 60 * 1)
 
     await Promise.map(wallets, transact)
