@@ -89,6 +89,7 @@ async function genRawTransaction (wallet, nonce) {
 async function transact (wallet) {
   await sleep(5000 * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
+  let backoff = 0
   while (true) {
     const raw = await genRawTransaction(wallet, nonce)
     const signed = await wallet.signTransaction(raw)
@@ -99,12 +100,13 @@ async function transact (wallet) {
         await sendRawTransaction(providerUrl, signed)
       } catch (e) {
         error('error sending transaction', e)
-        if (!['replacement transaction underpriced', 'nonce too low'].contains(e.message)) {
-          await sleep(interval)
+        if (!['replacement transaction underpriced', 'nonce too low'].includes(e.message)) {
+          await sleep(interval * Math.pow(2, backoff++))
           continue
         }
       }
       nonce++
+      backoff = 0
     }
     await sleep(interval)
   }
