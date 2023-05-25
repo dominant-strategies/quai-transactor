@@ -101,7 +101,7 @@ async function transact (wallet) {
       } catch (e) {
         error('error sending transaction', e)
         if (!['replacement transaction underpriced', 'nonce too low'].includes(e.message)) {
-          await sleep(interval * Math.pow(2, backoff++))
+          await sleep(interval * Math.pow(1.1, backoff++))
           continue
         }
       }
