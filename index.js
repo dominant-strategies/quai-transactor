@@ -87,7 +87,7 @@ async function genRawTransaction (wallet, nonce) {
 }
 
 async function transact (wallet) {
-  await sleep(5000 * Math.random())
+  await sleep(interval * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   let backoff = 0
   while (true) {
