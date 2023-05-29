@@ -115,16 +115,6 @@ async function lookupTxPending (url) {
     error('lookupTxPending Error2: ', e)
   }
 }
-async function sendRawTransaction (url, signedHexValue) {
-  const result = await post(url, {
-    jsonrpc: '2.0',
-    method: 'quai_sendRawTransaction',
-    params: [signedHexValue],
-    id: 1
-  })
-  if (result.data?.error) throw new Error(result.data.error.message)
-}
-
 function generateRandomAddress () {
   return `0x${crypto.randomBytes(20).toString('hex')}`
 }
@@ -155,6 +145,5 @@ module.exports = {
   lookupTxPending,
   nodeData,
   sleep,
-  sendRawTransaction,
   QUAI_CONTEXTS
 }

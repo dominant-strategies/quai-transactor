@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { JsonRpcProvider, Wallet } = require('quais')
+const { Wallet, WebSocketProvider } = require('quais')
 const walletsJson = require('./wallets.json')
 const { info, warn, error } = require('./logger')
 const {
@@ -7,21 +7,21 @@ const {
   lookupTxPending,
   nodeData,
   sleep,
-  sendRawTransaction,
   QUAI_CONTEXTS
 } = require('./utils')
 
-const protocol = 'http'
+const protocol = 'ws'
 const selectedGroup = process.argv[2]
 const selectedZone = process.argv[3]
 const host = process.argv?.[4] || 'localhost'
 const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
+const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const loValue = 1
 const hiValue = 100
 
 const chainId = 15000
 const etxFreq = 0
-const provider = new JsonRpcProvider(providerUrl)
+const provider = new WebSocketProvider(providerUrl)
 const memPoolMax = 4096
 
 let memPoolSize
@@ -55,7 +55,7 @@ function getRandomInternalAddress () {
   return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
-async function genRawTransaction (wallet, nonce) {
+async function genRawTransaction (nonce) {
   const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   const isExternal = Math.random() < etxFreq
 
@@ -87,24 +87,23 @@ async function genRawTransaction (wallet, nonce) {
   return ret
 }
 
-async function transact (wallet) {
+async function transact(wallet) {
   await sleep(interval * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   let backoff = 0
   while (true) {
-    const raw = await genRawTransaction(wallet, nonce)
-    const signed = await wallet.signTransaction(raw)
+    const raw = await genRawTransaction(nonce)
     if (memPoolSize < memPoolMax) {
       transactions++
       try {
         info('sending transaction', { memPoolSize, nonce, ...feeData, address: wallet.address })
-        await sendRawTransaction(providerUrl, signed)
+        await wallet.sendTransaction(raw)
       } catch (e) {
-        error('error sending transaction', e)
-        if (e.message === 'intrinsic gas too low') {
+        error('error sending transaction', e?.error || e)
+        if (e.error?.message === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
-        }
-        if (!['replacement transaction underpriced', 'nonce too low'].includes(e.message)) {
+        } // not an else if so both can be true
+        if (!['replacement transaction underpriced', 'nonce too low'].includes(e.error?.message)) {
           await sleep(interval * Math.pow(1.1, backoff++))
           continue
         }
@@ -124,14 +123,14 @@ async function transact (wallet) {
   }
 
   const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-  memPoolSize = (await lookupTxPending(providerUrl))[0]
+  memPoolSize = (await lookupTxPending(httpProviderUrl))[0]
   feeData = await provider.getFeeData()
 
   const start = Date.now()
   latest = start
 
   setInterval(async () => {
-    memPoolSize = (await lookupTxPending(providerUrl))?.[0] || memPoolSize
+    memPoolSize = (await lookupTxPending(httpProviderUrl))?.[0] || memPoolSize
     if (memPoolSize > memPoolMax) warn('mempool full')
   }, 1000 * 3)
 
