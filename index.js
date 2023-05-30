@@ -19,7 +19,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const loValue = 1
 const hiValue = 100
 
-const chainId = 15000
+const chainId = 1337
 const etxFreq = 0
 const provider = new WebSocketProvider(providerUrl)
 const memPoolMax = 4096
@@ -27,10 +27,10 @@ const memPoolMax = 4096
 let memPoolSize
 let transactions = 0
 let latest
-const interval = 10000
+const interval = 2000
 let feeData
 let walletStart = 0
-let walletEnd = 160
+let walletEnd = 60
 const numberOfNewWallets = 40
 
 const generateAbsoluteRandomRatio = 0
@@ -144,15 +144,6 @@ async function transact(wallet) {
   setInterval(async () => {
     feeData = await provider.getFeeData()
   }, 1000 * 30)
-
-  setInterval(async () => {
-    if (walletEnd + numberOfNewWallets <= walletsJson[selectedGroup][selectedZone].length) {
-      walletStart = walletEnd
-      walletEnd += numberOfNewWallets
-      const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-      await Promise.map(newWallets, transact)
-    }
-  }, 1000 * 60 * 60 * 1)
 
   await Promise.map(wallets, transact)
 })()
