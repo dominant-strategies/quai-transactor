@@ -105,7 +105,7 @@ async function lookupTxPending (url) {
       method: 'txpool_status',
       id: 1
     })
-    if (result.data.error) {
+    if (result.data?.error) {
       error('lookupTxPending Error1: ', result.data.error)
     }
     const resPend = result.data.result.pending
