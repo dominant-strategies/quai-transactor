@@ -19,7 +19,7 @@ const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
 const hiValue = 100
 
-const chainId = 15000
+const chainId = 1337
 const etxFreq = 0
 const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 4096
@@ -31,7 +31,7 @@ const interval = 10000
 let feeData
 let walletStart = 0
 let walletEnd = 160
-const numberOfNewWallets = 40
+const numberOfNewWallets = 0
 
 const generateAbsoluteRandomRatio = 0
 
@@ -102,11 +102,17 @@ async function transact (wallet) {
       } catch (e) {
         error('error sending transaction', e)
         if (e.message === 'intrinsic gas too low') {
+          await sleep(interval * Math.pow(1.1, backoff++))
           feeData = await provider.getFeeData()
+          continue
         }
         if (!['replacement transaction underpriced', 'nonce too low'].includes(e.message)) {
           await sleep(interval * Math.pow(1.1, backoff++))
           continue
+        }
+        if (e.code == 'ECONNRESET'){
+          await sleep(interval * Math.pow(1.1, backoff++))
+          nonce--
         }
       }
       nonce++
