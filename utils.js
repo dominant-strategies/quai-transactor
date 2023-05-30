@@ -108,9 +108,8 @@ async function lookupTxPending (url) {
     if (result.data?.error) {
       error('lookupTxPending Error1: ', result.data.error)
     }
-    const resPend = result.data.result.pending
-    const resQueued = result.data.result.queued
-    return [Number(resPend), Number(resQueued)]
+    const { pending, queued } = result.data.result
+    return [Number(pending), Number(queued)]
   } catch (e) {
     error('lookupTxPending Error2: ', e)
   }
