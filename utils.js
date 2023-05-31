@@ -1,5 +1,4 @@
 const { post } = require('axios')
-const { error } = require('./logger')
 const crypto = require('crypto')
 const Promise = require('bluebird')
 const nodeData = {
@@ -99,17 +98,17 @@ const QUAI_CONTEXTS = [
 ]
 
 async function lookupTxPending (url) {
-    const result = await post(url, {
-      jsonrpc: '2.0',
-      method: 'txpool_status',
-      id: 1
-    })
-    if (result.data?.error) {
-      throw new Error(result.data.error)
-    }
-    const { pending, queued } = result.data.result
+  const result = await post(url, {
+    jsonrpc: '2.0',
+    method: 'txpool_status',
+    id: 1
+  })
+  if (result.data?.error) {
+    throw new Error(result.data.error)
+  }
+  const { pending, queued } = result.data.result
 
-    return [Number(pending), Number(queued)]
+  return [Number(pending), Number(queued)]
 }
 function generateRandomAddress () {
   return `0x${crypto.randomBytes(20).toString('hex')}`

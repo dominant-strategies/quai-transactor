@@ -87,7 +87,7 @@ async function genRawTransaction (nonce) {
   return ret
 }
 
-async function transact(wallet) {
+async function transact (wallet) {
   await sleep(interval * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   let backoff = 0
@@ -132,7 +132,7 @@ async function transact(wallet) {
   const setMemPoolSize = async (n) => {
     try {
       const response = (await lookupTxPending(httpProviderUrl))?.[0]
-      memPoolSize = (response || response === 0)  ? response : memPoolSize
+      memPoolSize = (response || response === 0) ? response : memPoolSize
 
     } catch (e) {
       error('error getting mempool size', e)
