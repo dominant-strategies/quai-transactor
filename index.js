@@ -129,12 +129,18 @@ async function transact(wallet) {
   const start = Date.now()
   latest = start
 
-  setInterval(async () => {
-    const response = (await lookupTxPending(httpProviderUrl))?.[0]
-    memPoolSize = (response || response === 0)  ? response : memPoolSize
+  const setMemPoolSize = async (n) => {
+    try {
+      const response = (await lookupTxPending(httpProviderUrl))?.[0]
+      memPoolSize = (response || response === 0)  ? response : memPoolSize
 
+    } catch (e) {
+      error('error getting mempool size', e)
+      if (n && n < 3) await setMemPoolSize(n + 1)
+    }
     if (memPoolSize > memPoolMax) warn('mempool full')
-  }, 1000 * 3)
+  }
+  setInterval(setMemPoolSize, 1000 * 3)
 
   setInterval(async () => {
     const tps = transactions / ((Date.now() - latest) / 1000)

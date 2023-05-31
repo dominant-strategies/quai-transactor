@@ -99,20 +99,17 @@ const QUAI_CONTEXTS = [
 ]
 
 async function lookupTxPending (url) {
-  try {
     const result = await post(url, {
       jsonrpc: '2.0',
       method: 'txpool_status',
       id: 1
     })
     if (result.data?.error) {
-      error('lookupTxPending Error1: ', result.data.error)
+      throw new Error(result.data.error)
     }
     const { pending, queued } = result.data.result
+
     return [Number(pending), Number(queued)]
-  } catch (e) {
-    error('lookupTxPending Error2: ', e)
-  }
 }
 function generateRandomAddress () {
   return `0x${crypto.randomBytes(20).toString('hex')}`
