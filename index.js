@@ -30,7 +30,7 @@ let latest
 const interval = 10000
 let feeData
 let walletStart = 0
-let walletEnd = 160
+let walletEnd = 320
 const numberOfNewWallets = 0
 
 const generateAbsoluteRandomRatio = 0
@@ -159,7 +159,7 @@ async function transact (wallet) {
       const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
       await Promise.map(newWallets, transact)
     }
-  }, 1000 * 60 * 60 * 1)
+  }, 1000 * 600 * 60 * 1)
 
   await Promise.map(wallets, transact)
 })()
