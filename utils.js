@@ -97,6 +97,28 @@ const QUAI_CONTEXTS = [
   }
 ]
 
+const networks = {
+  1337: 'default',
+  9000: 'colosseum',
+  12000: 'garden',
+  15000: 'orchard',
+  17000: 'galena'
+}
+async function lookupChainId (url) {
+  const result = await post(url, {
+    jsonrpc: '2.0',
+    method: 'eth_chainId',
+    id: 1
+  })
+  if (result.data?.error) {
+    throw new Error(result.data.error)
+  }
+
+  const chainId = Number(result.data?.result)
+
+  return chainId
+}
+
 async function lookupTxPending (url) {
   const result = await post(url, {
     jsonrpc: '2.0',
@@ -137,8 +159,10 @@ function sleep (s) {
 
 module.exports = {
   generateRandomAddressInShard,
+  lookupChainId,
   lookupTxPending,
   nodeData,
+  networks,
   sleep,
   QUAI_CONTEXTS
 }
