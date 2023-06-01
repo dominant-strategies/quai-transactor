@@ -21,8 +21,8 @@ function formatDate (date) {
   return `${month}-${day}|${hours}:${minutes}:${seconds}.${milliseconds}`
 }
 
-const logger = winston.createLogger({
-  level: 'info',
+const logger = (level) => winston.createLogger({
+  level,
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.ms(),
