@@ -19,7 +19,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const loValue = 1
 const hiValue = 100
 
-const chainId = 1337
+const chainId = 12000
 const etxFreq = 0
 const provider = new WebSocketProvider(providerUrl)
 const memPoolMax = 4096
@@ -30,7 +30,7 @@ let latest
 const interval = 2000
 let feeData
 let walletStart = 0
-let walletEnd = 30
+let walletEnd = 15
 const numberOfNewWallets = 40
 
 const generateAbsoluteRandomRatio = 0
