@@ -130,7 +130,7 @@ async function lookupTxPending (url) {
   }
   const { pending, queued } = result.data.result
 
-  return [Number(pending), Number(queued)]
+  return { pending: Number(pending), queued: Number(queued) }
 }
 function generateRandomAddress () {
   return `0x${crypto.randomBytes(20).toString('hex')}`

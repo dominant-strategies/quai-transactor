@@ -42,7 +42,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let memPoolSize, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
+let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
   numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error // initialize atomics
 let transactions = 0
 
@@ -104,10 +104,13 @@ async function transact (wallet) {
   let backoff = 0
   while (true) {
     const raw = await genRawTransaction(nonce)
-    if (memPoolSize < memPoolMax) {
+    if (queued > memPoolMax) {
+      nonce = await provider.getTransactionCount(wallet.address, 'pending')
+    }
+    if (pending < memPoolMax) {
       transactions++
       try {
-        info('sending transaction', { memPoolSize, nonce, ...feeData, address: wallet.address })
+        info('sending transaction', { pending, nonce, ...feeData, address: wallet.address })
         await wallet.sendTransaction(raw)
       } catch (e) {
         error('error sending transaction', e?.error || e)
@@ -156,7 +159,9 @@ async function transact (wallet) {
   }
 
   const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-  memPoolSize = (await lookupTxPending(httpProviderUrl))[0]
+  const pool = await lookupTxPending(httpProviderUrl)
+  pending = pool?.pending
+  queued = pool?.queued
   feeData = await provider.getFeeData()
 
   const start = Date.now()
@@ -164,13 +169,14 @@ async function transact (wallet) {
 
   const setMemPoolSize = async (n) => {
     try {
-      const response = (await lookupTxPending(httpProviderUrl))?.[0]
-      memPoolSize = (response || response === 0) ? response : memPoolSize
+      const response = await lookupTxPending(httpProviderUrl)
+      pending = (response.pending || response.pending === 0) ? response.pending : pending
+      queued = (response.queued || response.queued === 0) ? response.queued : queued
     } catch (e) {
       error('error getting mempool size', e)
       if (n && n < 3) await setMemPoolSize(n + 1)
     }
-    if (memPoolSize > memPoolMax) warn('mempool full')
+    if (pending > memPoolMax) warn('mempool full')
   }
   if (config?.memPool.check.enabled) setInterval(setMemPoolSize, config?.memPool.check.interval)
 
