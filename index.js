@@ -10,10 +10,33 @@ const {
   sleep,
   QUAI_CONTEXTS
 } = require('./utils')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 
-const selectedGroup = process.argv[2]
-const selectedZone = process.argv[3]
-const host = process.argv?.[4] || 'localhost'
+const argv = yargs(hideBin(process.argv))
+  .option('group', {
+    alias: 'g',
+    type: 'string',
+    default: 'group-0',
+    description: 'Selected group',
+  })
+  .option('zone', {
+    alias: 'z',
+    type: 'string',
+    default: 'zone-0-0',
+    description: 'Selected zone'
+  })
+  .option('host', {
+    alias: 'h',
+    type: 'string',
+    default: 'localhost',
+    description: 'Host name'
+  })
+  .argv
+
+const selectedGroup = argv.group
+const selectedZone = argv.zone
+const host = argv.host
 const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
 const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 

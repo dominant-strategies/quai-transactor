@@ -14,7 +14,8 @@
     "config": "^3.3.9",
     "path": "^0.12.7",
     "quais": "^0.2.2",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "standard": "^17.0.0"
