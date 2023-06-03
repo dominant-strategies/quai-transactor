@@ -25,6 +25,12 @@ npm i
 
 ## Usage
 
+You can start every zone on group-0 with
+
+```bash
+npm start
+```
+
 You can run the script by using the following command.
 
 ```bash

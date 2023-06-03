@@ -18,7 +18,7 @@ const argv = yargs(hideBin(process.argv))
     alias: 'g',
     type: 'string',
     default: 'group-0',
-    description: 'Selected group',
+    description: 'Selected group'
   })
   .option('zone', {
     alias: 'z',

@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node start.js",
+    "stop": "node stop.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -11,6 +13,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "bluebird": "^3.7.2",
+    "child_process": "^1.0.2",
     "config": "^3.3.9",
     "path": "^0.12.7",
     "quais": "^0.2.2",
@@ -18,6 +21,6 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "standard": "^17.0.0"
+    "standard": "^17.1.0"
   }
 }
