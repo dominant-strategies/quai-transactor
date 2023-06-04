@@ -30,7 +30,7 @@ let latest
 const interval = 2000
 let feeData
 let walletStart = 0
-let walletEnd = 60
+let walletEnd = 75
 const numberOfNewWallets = 15
 
 const generateAbsoluteRandomRatio = 0
