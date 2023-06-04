@@ -31,7 +31,7 @@ const interval = 2000
 let feeData
 let walletStart = 0
 let walletEnd = 60
-const numberOfNewWallets = 40
+const numberOfNewWallets = 15
 
 const generateAbsoluteRandomRatio = 0
 
@@ -150,6 +150,15 @@ async function transact(wallet) {
   setInterval(async () => {
     feeData = await provider.getFeeData()
   }, 1000 * 30)
+
+  setInterval(async () => {
+    if (walletEnd + numberOfNewWallets <= walletsJson[selectedGroup][selectedZone].length) {
+      walletStart = walletEnd
+      walletEnd += numberOfNewWallets
+      const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+      await Promise.map(newWallets, transact)
+    }
+  }, 1000 * 60 * 60 * 4)
 
   await Promise.map(wallets, transact)
 })()
