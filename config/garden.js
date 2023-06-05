@@ -7,8 +7,9 @@ module.exports = {
     tps: {
       walletEnd: 105,
       increment: {
-        enabled: false
-      }
+        enabled: false,
+      },
+    etxFreq: .1,
     }
   }
 }
