@@ -104,7 +104,7 @@ async function transact (wallet) {
   let backoff = 0
   while (true) {
     const raw = await genRawTransaction(nonce)
-    if (queued > memPoolMax) {
+    if (queued > memPoolMax / 2) {
       nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax) {
