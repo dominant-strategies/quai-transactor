@@ -5,7 +5,7 @@ module.exports = {
   blockTime: 10 * 1000, // 10s
   txs: {
     tps: {
-      walletEnd: 250,
+      walletEnd: 105,
       increment: {
         enabled: false
       }
