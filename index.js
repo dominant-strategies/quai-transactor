@@ -19,7 +19,7 @@ const providerUrl = `${protocol}://${host}:${nodeData[selectedZone][protocol]}`
 const loValue = 1
 const hiValue = 100
 
-const chainId = 1337
+const chainId = 15000
 const etxFreq = 0
 const provider = new JsonRpcProvider(providerUrl)
 const memPoolMax = 4096
@@ -30,7 +30,7 @@ let latest
 const interval = 10000
 let feeData
 let walletStart = 0
-let walletEnd = 320
+let walletEnd = 148
 const numberOfNewWallets = 0
 
 const generateAbsoluteRandomRatio = 0
