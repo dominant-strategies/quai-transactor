@@ -11,5 +11,8 @@ module.exports = {
         interval: 1000 * 60 * 60 * 4 // 6hr
       },
     }
-  }
+  },
+  memPool: {
+    max: 2 * 4096,
+  },
 }
