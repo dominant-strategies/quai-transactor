@@ -171,8 +171,10 @@ async function transact (wallet) {
     walletEnd = walletsJson[selectedGroup][selectedZone].length
     info('walletEnd is greater than the number of wallets in the group, setting walletEnd to the number of wallets in the group', { walletEnd })
   }
+  const groupNumber = parseInt(selectedGroup.split('group')[1])
 
   const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+  wallets.concat(walletsJson[`group-${groupNumber+6}`][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider)))
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
   queued = pool?.queued
@@ -215,6 +217,7 @@ async function transact (wallet) {
         walletStart = walletEnd
         walletEnd += numNewWallets
         const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+        newWallets.concat(walletsJson[`group-${groupNumber+6}`][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider)))
         await Promise.map(newWallets, transact)
       }
     }, config?.txs.tps.increment.interval)
