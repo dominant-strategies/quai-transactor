@@ -2,10 +2,10 @@
 
 module.exports = {
   env: 'orchard',
-  blockTime: 12 * 1000, // 10s
+  blockTime: 2 * 12 * 1000, // 12s
   txs: {
     tps: {
-      walletEnd: 148,
+      walletEnd: 340,
       increment: {
         amount: 54,
         interval: 1000 * 60 * 60 * 4 // 6hr
