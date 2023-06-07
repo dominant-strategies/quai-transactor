@@ -2,5 +2,5 @@
 
 module.exports = {
   env: 'galena',
-  blockTime: 10 * 1000 // 10s
+  blockTime: 12 * 1000 // 12s
 }
