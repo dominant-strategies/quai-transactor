@@ -43,7 +43,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
-  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error // initialize atomics
+  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning // initialize atomics
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -104,7 +104,7 @@ async function transact (wallet) {
   let backoff = 0
   while (true) {
     const raw = await genRawTransaction(nonce)
-    if (queued > memPoolMax / 54) {
+    if (queued > memPoolMax / 9 / machinesRunning) {
       nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax) {
@@ -118,10 +118,11 @@ async function transact (wallet) {
         if (errorMessage === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
         } // not an else if so both can be true
+        const sleepTime = interval * Math.pow(1.1, backoff++)
+        await sleep(sleepTime)
         if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
           nonce = await provider.getTransactionCount(wallet.address, 'pending')
         }
-        await sleep(interval * Math.pow(1.1, backoff++))
         continue
       }
       nonce++
@@ -144,16 +145,17 @@ async function transact (wallet) {
 
   memPoolMax = config?.memPool.max
   interval = config?.blockTime
+  machinesRunning = config?.machinesRunning
   walletStart = 0
-  walletEnd = config?.txs.tps.walletEnd
+  walletEnd = config?.txs.tps.target / machinesRunning / 9 * interval / 1000
+  numNewWallets = config?.txs.tps.increment.amount / machinesRunning / 9 * interval / 1000
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
   generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
-  numNewWallets = config?.txs.tps.increment.amount
 
   info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
-  if (config?.dumpConfig) info('loaded', JSON.stringify(config, null, 2))
+  if (config?.dumpConfig) info('loaded', {config: JSON.stringify(config, null, 2)})
 
   if (walletEnd > walletsJson[selectedGroup][selectedZone].length) {
     walletEnd = walletsJson[selectedGroup][selectedZone].length

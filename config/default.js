@@ -7,6 +7,7 @@ module.exports = {
   env: 'default',
   dumpConfig: true,
   blockTime: 2 * 1000, // 2s
+  machinesRunning: 1,
   log: {
     winston: {
       opts: {
@@ -18,10 +19,10 @@ module.exports = {
   },
   txs: {
     tps: {
-      walletEnd: 80,
+      target: 100,
       increment: {
         enabled: true,
-        amount: 40,
+        amount: 200,
         interval: 1000 * 60 * 60 * 1 // 1hr
       },
       check: {
