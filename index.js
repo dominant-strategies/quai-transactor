@@ -104,7 +104,7 @@ async function transact (wallet) {
   let backoff = 0
   while (true) {
     const raw = await genRawTransaction(nonce)
-    if (queued > memPoolMax / 2) {
+    if (queued > memPoolMax / 54) {
       nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax) {
@@ -114,15 +114,15 @@ async function transact (wallet) {
         await wallet.sendTransaction(raw)
       } catch (e) {
         error('error sending transaction', e?.error || e)
-
-        if (e.error?.message === 'intrinsic gas too low') {
+        const errorMessage = e.error?.message || e.message
+        if (errorMessage === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
+        } // not an else if so both can be true
+        if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
+          nonce = await provider.getTransactionCount(wallet.address, 'pending')
         }
-
-        if (e.error?.message !== 'nonce too low') {
-          await sleep(interval * Math.pow(1.1, backoff++))
-          continue
-        }
+        await sleep(interval * Math.pow(1.1, backoff++))
+        continue
       }
       nonce++
       backoff = 0
