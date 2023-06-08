@@ -114,11 +114,14 @@ async function transact (wallet) {
         await wallet.sendTransaction(raw)
       } catch (e) {
         error('error sending transaction', e?.error || e)
+
         if (e.error?.message === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
-        } // not an else if so both can be true
-        if (!['replacement transaction underpriced', 'nonce too low'].includes(e.error?.message)) {
-          await sleep(interval * Math.pow(1.1, backoff++))
+        }
+
+        await sleep(interval * Math.pow(1.1, backoff++))
+
+        if (e.error?.message !== 'nonce too low') {
           continue
         }
       }
