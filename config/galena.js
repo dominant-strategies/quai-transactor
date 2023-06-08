@@ -12,6 +12,5 @@ module.exports = {
         interval: 1000 * 60 * 60 * 2 // 2hr
       }
     },
-    etxFreq: 0.1
   }
 }
