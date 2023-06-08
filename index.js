@@ -147,8 +147,8 @@ async function transact (wallet) {
   interval = config?.blockTime
   machinesRunning = config?.machinesRunning
   walletStart = 0
-  walletEnd = config?.txs.tps.target / machinesRunning / 9 * interval / 1000
-  numNewWallets = config?.txs.tps.increment.amount / machinesRunning / 9 * interval / 1000
+  walletEnd = Math.floor(config?.txs.tps.target / machinesRunning / 9 * interval / 1000)
+  numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / 9 * interval / 1000)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
