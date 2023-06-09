@@ -108,7 +108,7 @@ function loadLogger (config) {
 
 async function transact ({ wallet, nonce, backoff } = {}) {
   const raw = await genRawTransaction(nonce)
-  if (queued > memPoolMax / numSlices / machinesRunning ) {
+  if (queued > memPoolMax / numSlices) {
     nonce = await provider.getTransactionCount(wallet.address, 'pending')
   }
   if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
