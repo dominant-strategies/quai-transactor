@@ -43,7 +43,8 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
-  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime // initialize atomics
+  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime,
+  targetTps // initialize atomics
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -144,10 +145,11 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   const config = require('config')
 
   loadLogger(config)
+  targetTps = config?.txs?.tps?.target
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  interval = 1000 / (config?.txs?.tps?.target / machinesRunning / numSlices)
+  interval = 1000 / (targetTps / machinesRunning / numSlices)
   walletStart = 0
   walletEnd = walletsJson[selectedGroup][selectedZone].length
   numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
@@ -207,12 +209,8 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.increment.enabled) {
     setInterval(async () => {
-      if (walletEnd + numNewWallets <= walletsJson[selectedGroup][selectedZone].length) {
-        walletStart = walletEnd
-        walletEnd += numNewWallets
-        const newWallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
-        await Promise.map(newWallets, transact)
-      }
+      targetTps += config?.txs.tps.increment.amount
+      interval = 1000 / (targetTps / machinesRunning / numSlices)
     }, config?.txs.tps.increment.interval)
   }
 
