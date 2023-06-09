@@ -42,9 +42,9 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
-  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime,
-  targetTps // initialize atomics
+let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
+    generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
+
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -55,7 +55,7 @@ function getRandomExternalAddress () {
   if (Math.random() < generateAbsoluteRandomRatio) {
     return generateRandomAddressInShard(randomZone)
   }
-  const addresses = walletsJson[selectedGroup][randomZone.shard].slice(walletStart, walletEnd).map((wallet) => wallet.address)
+  const addresses = walletsJson[selectedGroup][randomZone.shard].map((wallet) => wallet.address)
   return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
@@ -63,7 +63,7 @@ function getRandomInternalAddress () {
   if (Math.random() < generateAbsoluteRandomRatio) {
     return generateRandomAddressInShard(selectedShard)
   }
-  const addresses = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => wallet.address)
+  const addresses = walletsJson[selectedGroup][selectedZone].map((wallet) => wallet.address)
   return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
@@ -150,8 +150,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
   interval = 1000 / (targetTps / machinesRunning / numSlices)
-  walletStart = 0
-  walletEnd = walletsJson[selectedGroup][selectedZone].length
   numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -163,12 +161,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  if (walletEnd > walletsJson[selectedGroup][selectedZone].length) {
-    walletEnd = walletsJson[selectedGroup][selectedZone].length
-    info('walletEnd is greater than the number of wallets in the group, setting walletEnd to the number of wallets in the group', { walletEnd })
-  }
-
-  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd), async (wallet) => {
+  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone], async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
   const pool = await lookupTxPending(httpProviderUrl)
@@ -197,7 +190,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       const tps = transactions / ((Date.now() - latest) / 1000)
       transactions = 0
       latest = Date.now()
-      info('tps check', { tps, walletEnd })
+      info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
     }, config?.txs.tps.check.interval)
   }
 
