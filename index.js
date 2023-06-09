@@ -124,6 +124,7 @@ async function transact (wallet) {
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   let backoff = 0
   while (true) {
+    const start = 0
     const raw = await genRawTransaction(nonce)
     if (queued > memPoolMax / numSlices / machinesRunning) {
       nonce = await provider.getTransactionCount(wallet.address, 'pending')
@@ -139,7 +140,7 @@ async function transact (wallet) {
         if (errorMessage === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
         } // not an else if so both can be true
-        const sleepTime = interval * Math.pow(1.1, backoff++)
+        const sleepTime = interval * Math.pow(1.1, backoff++) - (Date.now() - start)
         await sleep(sleepTime)
         if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
           nonce = await provider.getTransactionCount(wallet.address, 'pending')
@@ -149,7 +150,7 @@ async function transact (wallet) {
       nonce++
       backoff = 0
     }
-    await sleep(interval)
+    await sleep(interval - (Date.now() - start))
   }
 }
 
