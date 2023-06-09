@@ -43,7 +43,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
-  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices // initialize atomics
+  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime // initialize atomics
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -84,7 +84,8 @@ async function genRawTransaction (nonce) {
     to,
     value,
     nonce,
-    gasLimit: feeData.gasLimit,
+    // gasLimit: feeData.gasPrice,
+    gasLimit: 42000,
     maxFeePerGas: feeData.maxFeePerGas * BigInt(2),
     maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
     type,
@@ -105,38 +106,34 @@ function loadLogger (config) {
   error = log.error
 }
 
-async function transact (wallet) {
-  await sleep(interval * Math.random())
-  let nonce = await provider.getTransactionCount(wallet.address, 'pending')
-  let backoff = 0
-  while (true) {
-    const raw = await genRawTransaction(nonce)
-    if (queued > memPoolMax / numSlices / machinesRunning) {
-      nonce = await provider.getTransactionCount(wallet.address, 'pending')
-    }
-    if (pending < memPoolMax) {
-      transactions++
-      try {
-        info('sending transaction', { pending, nonce, ...feeData, address: wallet.address })
-        await wallet.sendTransaction(raw)
-      } catch (e) {
-        error('error sending transaction', e?.error || e)
-        const errorMessage = e.error?.message || e.message
-        if (errorMessage === 'intrinsic gas too low') {
-          feeData = await provider.getFeeData()
-        } // not an else if so both can be true
-        const sleepTime = interval * Math.pow(1.1, backoff++)
-        await sleep(sleepTime)
-        if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
-          nonce = await provider.getTransactionCount(wallet.address, 'pending')
-        }
-        continue
-      }
-      nonce++
-      backoff = 0
-    }
-    await sleep(interval)
+async function transact ({ wallet, nonce, backoff } = {}) {
+  const raw = await genRawTransaction(nonce)
+  if (queued > memPoolMax / numSlices / machinesRunning ) {
+    nonce = await provider.getTransactionCount(wallet.address, 'pending')
   }
+  if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
+    transactions++
+    try {
+      info('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
+      wallet.lastSent = Date.now()
+      await wallet.sendTransaction(raw)
+    } catch (e) {
+      error('error sending transaction', e?.error || e)
+      const errorMessage = e.error?.message || e.message
+      if (errorMessage === 'intrinsic gas too low') {
+        feeData = await provider.getFeeData()
+      } // not an else if so both can be true
+      if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
+        nonce = await provider.getTransactionCount(wallet.address, 'pending')
+      } else {
+        nonce++
+      }
+      backoff++
+      return ({ wallet, nonce, backoff })
+    }
+    nonce++
+  }
+  return ({ wallet, nonce, backoff: 0 })
 }
 
 ;(async () => {
@@ -148,16 +145,17 @@ async function transact (wallet) {
 
   loadLogger(config)
   memPoolMax = config?.memPool.max
-  interval = config?.blockTime
+  interval = 1000 / (config?.txs?.tps?.target / machinesRunning / numSlices)
   machinesRunning = config?.machinesRunning
   walletStart = 0
   numSlices = config?.numSlices
-  walletEnd = Math.floor(config?.txs.tps.target / machinesRunning / numSlices * interval / 1000)
+  walletEnd = walletsJson[selectedGroup][selectedZone].length
   numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
   generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
+  blockTime = config?.blockTime
 
   info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
 
@@ -168,7 +166,9 @@ async function transact (wallet) {
     info('walletEnd is greater than the number of wallets in the group, setting walletEnd to the number of wallets in the group', { walletEnd })
   }
 
-  const wallets = walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd).map((wallet) => new Wallet(wallet.privateKey, provider))
+  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone].slice(walletStart, walletEnd), async (wallet) => {
+    return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
+  })
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
   queued = pool?.queued
@@ -216,5 +216,11 @@ async function transact (wallet) {
     }, config?.txs.tps.increment.interval)
   }
 
-  await Promise.map(wallets, transact)
+  let index = 0
+  while (true) {
+    const start = Date.now()
+    wallets[index] = await transact(wallets[index])
+    await sleep(interval - (Date.now() - start) + Math.pow(1.1, wallets[index].backoff))
+    index = (index + 1) % wallets.length
+  }
 })()
