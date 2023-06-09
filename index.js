@@ -114,7 +114,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   if (queued > memPoolMax / numSlices) {
     nonce = await provider.getTransactionCount(wallet.address, 'pending')
   }
-  if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
+  if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > 2 * blockTime)) {
     transactions++
     try {
       info('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
@@ -195,6 +195,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
       interval = interval + Kp * (tps - targetTps / machinesRunning / numSlices)
+      if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
 
@@ -216,7 +217,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
     const start = Date.now()
     wallets[index] = await transact(wallets[index])
     const sleepTime = interval - (Date.now() - start) + Math.pow(1.1, wallets[index].backoff)
-    await sleep(sleepTime)
+    await sleep(sleepTime > 0 ? sleepTime : 0)
     index = (index + 1) % wallets.length
   }
 })()
