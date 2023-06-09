@@ -84,7 +84,7 @@ async function genRawTransaction (nonce) {
     to,
     value,
     nonce,
-    gasLimit: 42000,
+    gasLimit: feeData.gasLimit,
     maxFeePerGas: feeData.maxFeePerGas * BigInt(2),
     maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
     type,
