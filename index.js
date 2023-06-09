@@ -45,6 +45,8 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
     generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
+const Kp = 0.2//, Ki = 0.05
+
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -191,6 +193,8 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       transactions = 0
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
+
+      interval = interval + Kp * (tps - targetTps / machinesRunning / numSlices)
     }, config?.txs.tps.check.interval)
   }
 
