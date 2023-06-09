@@ -134,7 +134,7 @@ async function transact (wallet) {
         info('sending transaction', { pending, nonce, ...feeData, address: wallet.address })
         await wallet.sendTransaction(raw)
       } catch (e) {
-        error('error sending transaction', { error: e?.error || e, tx: JSON.stringify(raw, null, 2), pending, queued, address: wallet.address })
+        error('error sending transaction', { error: e?.error || e, pending, queued, address: wallet.address })
         const errorMessage = e.error?.message || e.message
         if (errorMessage === 'intrinsic gas too low') {
           feeData = await provider.getFeeData()
