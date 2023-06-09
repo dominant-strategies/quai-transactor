@@ -43,7 +43,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, walletStart, walletEnd,
-  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning // initialize atomics
+  numNewWallets, etxFreq, generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices // initialize atomics
 let transactions = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
@@ -98,13 +98,34 @@ async function genRawTransaction (nonce) {
   return ret
 }
 
+function loadLogger (config) {
+  const log = require('./logger')(config?.log.winston.opts.level)
+  info = log.info
+  warn = log.warn
+  error = log.error
+}
+
+function loadAtomics (config) {
+  memPoolMax = config?.memPool.max
+  interval = config?.blockTime
+  machinesRunning = config?.machinesRunning
+  walletStart = 0
+  numSlices = config?.numSlices
+  walletEnd = Math.floor(config?.txs.tps.target / machinesRunning / numSlices * interval / 1000)
+  numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
+  loValue = config?.txs.loValue
+  hiValue = config?.txs.hiValue
+  etxFreq = config?.txs.etxFreq
+  generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
+}
+
 async function transact (wallet) {
   await sleep(interval * Math.random())
   let nonce = await provider.getTransactionCount(wallet.address, 'pending')
   let backoff = 0
   while (true) {
     const raw = await genRawTransaction(nonce)
-    if (queued > memPoolMax / 9 / machinesRunning) {
+    if (queued > memPoolMax / numSlices / machinesRunning) {
       nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax) {
@@ -138,24 +159,13 @@ async function transact (wallet) {
   if (!network) throw new Error(`network not found for chainId ${chainId}`)
   process.env.NODE_ENV = network
   const config = require('config')
-  const log = require('./logger')(config?.log.winston.opts.level)
-  info = log.info
-  warn = log.warn
-  error = log.error
 
-  memPoolMax = config?.memPool.max
-  interval = config?.blockTime
-  machinesRunning = config?.machinesRunning
-  walletStart = 0
-  walletEnd = Math.floor(config?.txs.tps.target / machinesRunning / 9 * interval / 1000)
-  numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / 9 * interval / 1000)
-  loValue = config?.txs.loValue
-  hiValue = config?.txs.hiValue
-  etxFreq = config?.txs.etxFreq
-  generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
+  loadLogger(config)
+  loadAtomics(config)
 
   info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
-  if (config?.dumpConfig) info('loaded', {config: JSON.stringify(config, null, 2)})
+
+  if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
   if (walletEnd > walletsJson[selectedGroup][selectedZone].length) {
     walletEnd = walletsJson[selectedGroup][selectedZone].length

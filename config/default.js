@@ -8,6 +8,7 @@ module.exports = {
   dumpConfig: true,
   blockTime: 2 * 1000, // 2s
   machinesRunning: 1,
+  numSlices: 9,
   log: {
     winston: {
       opts: {
