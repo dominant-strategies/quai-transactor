@@ -145,10 +145,10 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   loadLogger(config)
   memPoolMax = config?.memPool.max
-  interval = 1000 / (config?.txs?.tps?.target / machinesRunning / numSlices)
-  machinesRunning = config?.machinesRunning
-  walletStart = 0
   numSlices = config?.numSlices
+  machinesRunning = config?.machinesRunning
+  interval = 1000 / (config?.txs?.tps?.target / machinesRunning / numSlices)
+  walletStart = 0
   walletEnd = walletsJson[selectedGroup][selectedZone].length
   numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
   loValue = config?.txs.loValue
@@ -220,7 +220,8 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   while (true) {
     const start = Date.now()
     wallets[index] = await transact(wallets[index])
-    await sleep(interval - (Date.now() - start) + Math.pow(1.1, wallets[index].backoff))
+    const sleepTime = interval - (Date.now() - start) + Math.pow(1.1, wallets[index].backoff)
+    await sleep(sleepTime)
     index = (index + 1) % wallets.length
   }
 })()
