@@ -8,9 +8,9 @@ module.exports = {
     tps: {
       target: 300,
       increment: {
-	amount: 100,
+        amount: 100,
         interval: 1000 * 60 * 60 * 2 // 2hr
       }
-    },
+    }
   }
 }
