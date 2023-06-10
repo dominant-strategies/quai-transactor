@@ -134,11 +134,13 @@ async function transact ({ wallet, nonce, backoff } = {}) {
         nonce++
       }
       backoff++
-      return ({ wallet, nonce, backoff })
     }
     nonce++
+    backoff = 0
   }
-  return ({ wallet, nonce, backoff: 0 })
+  const sleepTime = Math.pow(1.1, backoff) * interval - (Date.now() - start)
+  await sleep(sleepTime > 0 ? sleepTime : 0)
+  return ({ wallet, nonce, backoff })
 }
 
 ;(async () => {
@@ -218,8 +220,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   while (true) {
     const start = Date.now()
     wallets[index] = await transact(wallets[index])
-    const sleepTime = Math.pow(1.1, wallets[index].backoff) * interval - (Date.now() - start) 
-    await sleep(sleepTime > 0 ? sleepTime : 0)
     index = (index + 1) % wallets.length
   }
 })()
