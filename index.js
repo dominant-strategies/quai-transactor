@@ -153,7 +153,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  interval = 1000 / (targetTps / machinesRunning / numSlices)
+  interval = 1000 / (targetTps / machinesRunning / numSlices) * walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]).length
   numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -168,6 +168,13 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]), async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
+
+  async function startTransaction(wallet) {
+    wallet = await transact(wallet);
+    
+    setTimeout(() => startTransaction(wallet), interval);
+  }
+
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
   queued = pool?.queued
@@ -196,7 +203,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = interval + Kp * (tps - targetTps / machinesRunning / numSlices)
+      interval = (interval + Kp * (tps - targetTps / machinesRunning / numSlices) ) 
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
@@ -210,13 +217,11 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   if (config?.txs.tps.increment.enabled) {
     setInterval(async () => {
       targetTps += config?.txs.tps.increment.amount
-      interval = 1000 / (targetTps / machinesRunning / numSlices)
+      interval = 1000 / (targetTps / machinesRunning / numSlices) * wallets.length
     }, config?.txs.tps.increment.interval)
   }
-
-  let index = 0
-  while (true) {
-    wallets[index] = await transact(wallets[index])
-    index = (index + 1) % wallets.length
+  for (const wallet of wallets) {
+    startTransaction(wallet)
+    await sleep(interval / wallets.length)
   }
 })()
