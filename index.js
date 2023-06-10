@@ -113,11 +113,11 @@ function loadLogger (config) {
 
 async function transact ({ wallet, nonce, backoff } = {}) {
   const start = Date.now()
-  const raw = await genRawTransaction(nonce)
   if (queued > memPoolMax / numSlices) {
     nonce = await provider.getTransactionCount(wallet.address, 'pending')
   }
   if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > 2 * blockTime)) {
+    const raw = await genRawTransaction(nonce++)
     transactions++
     try {
       debug('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
@@ -131,16 +131,13 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       } // not an else if so both can be true
       if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
         nonce = await provider.getTransactionCount(wallet.address, 'pending')
-      } else {
-        nonce++
       }
       backoff++
     }
-    nonce++
     backoff = 0
+    const sleepTime = Math.pow(1.1, backoff) * interval - (Date.now() - start)
+    await sleep(sleepTime > 0 ? sleepTime : 0)
   }
-  const sleepTime = Math.pow(1.1, backoff) * interval - (Date.now() - start)
-  await sleep(sleepTime > 0 ? sleepTime : 0)
   return ({ wallet, nonce, backoff })
 }
 
