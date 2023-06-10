@@ -6,7 +6,7 @@ module.exports = {
   machinesRunning: 6,
   txs: {
     tps: {
-      target: 1000,
+      target: 1250,
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 4 // 4hr
