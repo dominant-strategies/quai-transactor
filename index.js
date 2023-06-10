@@ -37,6 +37,7 @@ const argv = yargs(hideBin(process.argv))
 const selectedGroup = argv.group
 const selectedZone = argv.zone
 const host = argv.host
+const groupNum = parseInt(selectedGroup.split('-')[1]) + 6
 const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
 const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
@@ -164,7 +165,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone], async (wallet) => {
+  const wallets = await Promise.map(walletsJson[`group-${groupNum}`][selectedZone], async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
   const pool = await lookupTxPending(httpProviderUrl)
