@@ -7,13 +7,13 @@ module.exports = {
   log: {
     winston: {
       opts: {
-        level: 'info'
+        level: 'debug'
       }
     }
   },
   txs: {
     tps: {
-      target: 1500,
+      target: 1750,
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 4 // 4hr
