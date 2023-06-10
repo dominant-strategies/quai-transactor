@@ -16,8 +16,8 @@ const { hideBin } = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv))
   .option('group', {
     alias: 'g',
-    type: 'string',
-    default: 'group-0',
+    type: 'number',
+    default: 0,
     description: 'Selected group'
   })
   .option('zone', {
@@ -34,7 +34,8 @@ const argv = yargs(hideBin(process.argv))
   })
   .argv
 
-const selectedGroup = argv.group
+const groupNumber = argv.group
+const selectedGroup = `group-${groupNumber}`
 const selectedZone = argv.zone
 const host = argv.host
 const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
@@ -164,7 +165,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone], async (wallet) => {
+  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber}`][selectedZone]), async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
   const pool = await lookupTxPending(httpProviderUrl)
