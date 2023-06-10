@@ -117,7 +117,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > 2 * blockTime)) {
     transactions++
     try {
-      info('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
+      debug('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
       wallet.lastSent = Date.now()
       await wallet.sendTransaction(raw)
     } catch (e) {

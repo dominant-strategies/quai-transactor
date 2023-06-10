@@ -4,6 +4,13 @@ module.exports = {
   env: 'orchard',
   blockTime: 2 * 12 * 1000, // 12s
   machinesRunning: 6,
+  log: {
+    winston: {
+      opts: {
+        level: 'error'
+      }
+    }
+  },
   txs: {
     tps: {
       target: 1250,
