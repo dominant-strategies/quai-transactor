@@ -123,6 +123,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       debug('sending transaction', { pending, queued, nonce, ...feeData, address: wallet.address, tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value)) })
       wallet.lastSent = Date.now()
       await wallet.sendTransaction(raw)
+      backoff = 0
     } catch (e) {
       error('error sending transaction', e?.error || e)
       const errorMessage = e.error?.message || e.message
@@ -134,7 +135,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       }
       backoff++
     }
-    backoff = 0
     const sleepTime = Math.pow(1.1, backoff) * interval - (Date.now() - start)
     await sleep(sleepTime > 0 ? sleepTime : 0)
   }
