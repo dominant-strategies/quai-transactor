@@ -7,7 +7,7 @@ module.exports = {
   log: {
     winston: {
       opts: {
-        level: 'error'
+        level: 'info'
       }
     }
   },

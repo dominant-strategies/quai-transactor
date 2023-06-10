@@ -43,7 +43,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
-    generateAbsoluteRandomRatio, info, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
+    generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
 const Kp = 0.02//, Ki = 0.05
 
@@ -107,6 +107,7 @@ function loadLogger (config) {
   info = log.info
   warn = log.warn
   error = log.error
+  debug = log.debug
 }
 
 async function transact ({ wallet, nonce, backoff } = {}) {
