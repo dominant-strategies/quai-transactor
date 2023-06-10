@@ -181,11 +181,11 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       const response = await lookupTxPending(httpProviderUrl)
       pending = (response.pending || response.pending === 0) ? response.pending : pending
       queued = (response.queued || response.queued === 0) ? response.queued : queued
+      if (pending > memPoolMax) warn('mempool full')
     } catch (e) {
       error('error getting mempool size', e)
       if (n && n < 3) await setMemPoolSize(n + 1)
     }
-    if (pending > memPoolMax) warn('mempool full')
   }
   if (config?.memPool.check.enabled) setInterval(setMemPoolSize, config?.memPool.check.interval)
 
