@@ -112,6 +112,7 @@ function loadLogger (config) {
 }
 
 async function transact ({ wallet, nonce, backoff } = {}) {
+  const start = Date.now()
   const raw = await genRawTransaction(nonce)
   if (queued > memPoolMax / numSlices) {
     nonce = await provider.getTransactionCount(wallet.address, 'pending')
@@ -218,7 +219,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   let index = 0
   while (true) {
-    const start = Date.now()
     wallets[index] = await transact(wallets[index])
     index = (index + 1) % wallets.length
   }
