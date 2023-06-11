@@ -192,7 +192,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.check.enabled) {
     setInterval(async () => {
-      info('what the NAN?', { tps, transactions, latest, now: Date.now })
       tps = (tps + (transactions / ((Date.now() - latest) / 1000))) / 2
       transactions = 0
       latest = Date.now()
