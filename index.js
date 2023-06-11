@@ -203,7 +203,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = (interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps))
+      interval = Math.min((interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps)), blockTime / 2)
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
