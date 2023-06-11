@@ -46,7 +46,7 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
-const Kp = 0.03//, Ki = 0.05
+const Kp = 0.003 //, Ki = 0.05
 
 let transactions = 0; let tps = 0; let oldTps = 0
 
