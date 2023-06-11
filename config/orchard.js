@@ -21,6 +21,6 @@ module.exports = {
     }
   },
   memPool: {
-    max: 2 * 4096
+    max: 12000
   }
 }
