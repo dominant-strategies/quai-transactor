@@ -43,7 +43,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
+let tps, pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
     generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
 const Kp = 0.03//, Ki = 0.05
@@ -198,7 +198,8 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.check.enabled) {
     setInterval(async () => {
-      const tps = transactions / ((Date.now() - latest) / 1000)
+      
+      tps = (tps + (transactions / ((Date.now() - latest) / 1000))) / 2
       transactions = 0
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
