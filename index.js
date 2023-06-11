@@ -135,8 +135,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       }
       backoff++
     }
-    const sleepTime = Math.pow(1.1, backoff) * interval - (Date.now() - start)
-    await sleep(sleepTime > 0 ? sleepTime : 0)
   }
   return ({ wallet, nonce, backoff })
 }
@@ -172,7 +170,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   async function startTransaction (wallet) {
     wallet = await transact(wallet)
 
-    setTimeout(() => startTransaction(wallet), interval * wallets.length)
+    setTimeout(() => startTransaction(wallet), interval * wallets.length )
   }
 
   const pool = await lookupTxPending(httpProviderUrl)
