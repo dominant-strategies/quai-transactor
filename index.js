@@ -172,7 +172,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   async function startTransaction(wallet) {
     wallet = await transact(wallet);
     
-    setTimeout(() => startTransaction(wallet), interval / wallets.length);
+    setTimeout(() => startTransaction(wallet), interval);
   }
 
   const pool = await lookupTxPending(httpProviderUrl)
@@ -203,7 +203,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = (interval + interval * Kp * (targetTps / machinesRunning / numSlices - tps) ) 
+      interval = (interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps) ) 
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
