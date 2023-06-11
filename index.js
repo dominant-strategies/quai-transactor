@@ -46,7 +46,7 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
     generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
-const Kp = 20//, Ki = 0.05
+const Kp = 0.1//, Ki = 0.05
 
 let transactions = 0
 
@@ -203,7 +203,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = (interval + Kp * (tps - targetTps / machinesRunning / numSlices) ) 
+      interval = (interval + interval * Kp * (targetTps / machinesRunning / numSlices - tps) ) 
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
@@ -216,8 +216,9 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.increment.enabled) {
     setInterval(async () => {
+      oldTps = targetTps
       targetTps += config?.txs.tps.increment.amount
-      interval = 1000 / (targetTps / machinesRunning / numSlices) * wallets.length
+      interval = oldTps/targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
   for (const wallet of wallets) {
