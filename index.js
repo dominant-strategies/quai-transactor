@@ -46,7 +46,7 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
-const Kp = 0.1 //, Ki = 0.05
+const Kp = 0.003 //, Ki = 0.05
 
 let transactions = 0; let tps = 0; let oldTps = 0
 
@@ -154,7 +154,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
   const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
-  interval = walletUsed.length / (targetTps / machinesRunning / numSlices) * 1000
+  interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
@@ -172,7 +172,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   async function startTransaction (wallet) {
     wallet = await transact(wallet)
 
-    setTimeout(() => startTransaction(wallet), interval)
+    setTimeout(() => startTransaction(wallet), interval * wallets.length)
   }
 
   const pool = await lookupTxPending(httpProviderUrl)
@@ -198,13 +198,13 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.check.enabled) {
     setInterval(async () => {
-      info('what the NAN?', { tps, transactions, latest, now: Date.now })
-      tps = (tps + (transactions / ((Date.now() - latest) / 1000))) / 2
+      //tps = (tps + (transactions / ((Date.now() - latest) / 1000))) / 2
+      tps = transactions / ((Date.now() - latest) / 1000)
       transactions = 0
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = Math.max((interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps)), blockTime / 2)
+      //interval = interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps)
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
@@ -222,8 +222,8 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (const wallet of wallets) {
-    startTransaction(wallet)
-    await sleep(interval / wallets.length)
+  for (let i = 0; i < wallets.length; i++) {
+    startTransaction(wallets[i])
+    await sleep(interval)
   }
 })()

@@ -20,7 +20,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 100,
+      target: 2500,
       increment: {
         enabled: true,
         amount: 200,
@@ -28,7 +28,7 @@ module.exports = {
       },
       check: {
         enabled: true,
-        interval: 1000 * 5 * 60 // 5m
+        interval: 1000 * 3 // 3s 
       }
     },
     etxFreq: 0,
