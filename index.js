@@ -43,12 +43,12 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
-    generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
+let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
+  generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
 const Kp = 0.03//, Ki = 0.05
 
-let transactions, tps = 0
+let transactions; let tps; let oldTps = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
@@ -153,8 +153,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  interval =  walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]).length / (targetTps / machinesRunning / numSlices) * 1000
-  numNewWallets = Math.floor(config?.txs.tps.increment.amount / machinesRunning / numSlices * interval / 1000)
+  interval = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]).length / (targetTps / machinesRunning / numSlices) * 1000
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
@@ -169,10 +168,10 @@ async function transact ({ wallet, nonce, backoff } = {}) {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
 
-  async function startTransaction(wallet) {
-    wallet = await transact(wallet);
-    
-    setTimeout(() => startTransaction(wallet), interval);
+  async function startTransaction (wallet) {
+    wallet = await transact(wallet)
+
+    setTimeout(() => startTransaction(wallet), interval)
   }
 
   const pool = await lookupTxPending(httpProviderUrl)
@@ -198,13 +197,13 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.txs.tps.check.enabled) {
     setInterval(async () => {
-      
+      info('what the NAN?', { tps, transactions, latest, now: Date.now })
       tps = (tps + (transactions / ((Date.now() - latest) / 1000))) / 2
       transactions = 0
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = (interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps) ) 
+      interval = (interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps))
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
@@ -219,11 +218,11 @@ async function transact ({ wallet, nonce, backoff } = {}) {
     setInterval(async () => {
       oldTps = targetTps
       targetTps += config?.txs.tps.increment.amount
-      interval = oldTps/targetTps * interval
+      interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
   for (const wallet of wallets) {
     startTransaction(wallet)
-    await sleep(Math.random()*interval)
+    await sleep(Math.random() * interval)
   }
 })()
