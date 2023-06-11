@@ -153,18 +153,19 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  interval = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]).length / (targetTps / machinesRunning / numSlices) * 1000
+  const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
+  interval = walletUsed.length / (targetTps / machinesRunning / numSlices) * 1000
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
   generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
   blockTime = config?.blockTime
 
-  info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup })
+  info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup, walletSize: walletUsed.length, interval })
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  const wallets = await Promise.map(walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone]), async (wallet) => {
+  const wallets = await Promise.map(walletUsed, async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
 
@@ -223,6 +224,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   }
   for (const wallet of wallets) {
     startTransaction(wallet)
-    await sleep(Math.random() * interval)
+    await sleep(interval / wallets.length)
   }
 })()
