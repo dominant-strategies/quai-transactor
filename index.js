@@ -48,7 +48,7 @@ let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, int
 
 const Kp = 0.03//, Ki = 0.05
 
-let transactions; let tps; let oldTps = 0
+let transactions = 0; let tps = 0; let oldTps = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
