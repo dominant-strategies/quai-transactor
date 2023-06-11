@@ -223,6 +223,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   }
   for (const wallet of wallets) {
     startTransaction(wallet)
-    await sleep(interval / wallets.length)
+    await sleep(interval)
   }
 })()
