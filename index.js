@@ -46,7 +46,7 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
-const Kp = 0.1 //, Ki = 0.05
+const Kp = 0.003 //, Ki = 0.05
 
 let transactions = 0; let tps = 0; let oldTps = 0
 
@@ -153,7 +153,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
+  const walletUsed = walletsJson[selectedGroup][selectedZone]
   interval = walletUsed.length / (targetTps / machinesRunning / numSlices) * 1000
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -168,12 +168,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   const wallets = await Promise.map(walletUsed, async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
-
-  async function startTransaction (wallet) {
-    wallet = await transact(wallet)
-
-    setTimeout(() => startTransaction(wallet), interval)
-  }
 
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
@@ -222,8 +216,10 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (const wallet of wallets) {
-    startTransaction(wallet)
+  let index = 0
+  while (true) {
+    wallets[index] = await transact(wallets[index])
     await sleep(interval / wallets.length)
+    index = index + 1 % wallets.length
   }
 })()
