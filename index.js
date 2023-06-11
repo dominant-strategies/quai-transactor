@@ -154,7 +154,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
   const walletUsed = walletsJson[selectedGroup][selectedZone]
-  interval = walletUsed.length / (targetTps / machinesRunning / numSlices) * 1000
+  interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
@@ -198,7 +198,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       latest = Date.now()
       info('tps check', { tps, interval, targetTps: targetTps / machinesRunning / numSlices })
 
-      interval = Math.max((interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps)), blockTime / 2)
+      interval = interval - interval * Kp * (targetTps / machinesRunning / numSlices - tps)
       if (interval < 0) interval = 0
     }, config?.txs.tps.check.interval)
   }
