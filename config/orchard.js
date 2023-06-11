@@ -3,7 +3,7 @@
 module.exports = {
   env: 'orchard',
   blockTime: 2 * 12 * 1000, // 12s
-  machinesRunning: 6,
+  machinesRunning: 6 * 2,
   log: {
     winston: {
       opts: {

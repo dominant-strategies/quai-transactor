@@ -36,6 +36,7 @@ const argv = yargs(hideBin(process.argv))
 
 const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
+const selectedGroup2 = `group-${groupNumber + 6}`
 const selectedZone = argv.zone
 const host = argv.host
 const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
@@ -154,6 +155,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
   const walletUsed = walletsJson[selectedGroup][selectedZone]
+  const walletUsed2 = walletsJson[selectedGroup2][selectedZone]
   interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -165,7 +167,10 @@ async function transact ({ wallet, nonce, backoff } = {}) {
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  const wallets = await Promise.map(walletUsed, async (wallet) => {
+  const wallets1 = await Promise.map(walletUsed, async (wallet) => {
+    return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
+  })
+  const wallets2 = await Promise.map(walletUsed2, async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
 
@@ -215,10 +220,14 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  let index = 0
-  while (true) {
-    wallets[index] = await transact(wallets[index])
-    await sleep(interval / wallets.length)
-    index = (index + 1) % wallets.length
+  const go = async (wallets) => {
+    let index = 0
+    while (true) {
+      wallets[index] = await transact(wallets[index])
+      await sleep(interval / wallets.length)
+      index = (index + 1) % wallets.length
+    }
   }
+  go(wallets1)
+  await go(wallets2)
 })()
