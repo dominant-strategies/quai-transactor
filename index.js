@@ -43,12 +43,12 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let tps, pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
+let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, numNewWallets, etxFreq,
     generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
 const Kp = 0.03//, Ki = 0.05
 
-let transactions = 0
+let transactions, tps = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
