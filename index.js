@@ -220,6 +220,6 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   while (true) {
     wallets[index] = await transact(wallets[index])
     await sleep(interval / wallets.length)
-    index = index + 1 % wallets.length
+    index = (index + 1) % wallets.length
   }
 })()
