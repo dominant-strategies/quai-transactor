@@ -17,6 +17,9 @@ module.exports = {
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 4 // 4hr
+      },
+      check: {
+        enabled: false,
       }
     }
   },

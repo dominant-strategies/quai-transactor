@@ -223,8 +223,9 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   const go = async (wallets) => {
     let index = 0
     while (true) {
+      const start = Date.now()
       wallets[index] = await transact(wallets[index])
-      await sleep(interval / wallets.length)
+      await sleep(interval / wallets.length - (Date.now() - start))
       index = (index + 1) % wallets.length
     }
   }
