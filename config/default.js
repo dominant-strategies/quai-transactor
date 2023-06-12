@@ -46,7 +46,7 @@ module.exports = {
   feeData: {
     check: {
       enabled: true,
-      interval: 1000 * 3 // 3s
+      interval: 1000 * 1 // 3s
     }
   }
 }
