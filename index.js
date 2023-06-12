@@ -44,7 +44,8 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
-  generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
+  generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps, // initialize atomics
+  threads, walletsNeeded
 
 const Kp = 0.003 //, Ki = 0.05
 
@@ -151,7 +152,7 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
+  const walletsUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
   interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -159,18 +160,22 @@ async function transact ({ wallet, nonce, backoff } = {}) {
   generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
   blockTime = config?.blockTime
 
-  info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup, walletSize: walletUsed.length, interval })
+  walletsNeeded = 2 * blockTime / interval
+  threads = Math.floor(walletsUsed.length / walletsNeeded)
+  interval *= threads
+
+  info('Starting QUAI load test', { shard: selectedShard.shard, selectedGroup, walletsNeeded, threads, interval })
 
   if (config?.dumpConfig) info('loaded', { config: JSON.stringify(config, null, 2) })
 
-  const wallets = await Promise.map(walletUsed, async (wallet) => {
+  const wallets = await Promise.map(walletsUsed, async (wallet) => {
     return ({ wallet: new Wallet(wallet.privateKey, provider), nonce: await provider.getTransactionCount(wallet.address, 'pending'), backoff: 0 })
   })
 
   async function startTransaction (wallet) {
     wallet = await transact(wallet)
 
-    setTimeout(() => startTransaction(wallet), interval * wallets.length )
+    setTimeout(() => startTransaction(wallet), 2 * blockTime)
   }
 
   const pool = await lookupTxPending(httpProviderUrl)
@@ -220,8 +225,10 @@ async function transact ({ wallet, nonce, backoff } = {}) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (let i = 0; i < wallets.length; i++) {
-    startTransaction(wallets[i])
+  for (let i = 0; i < wallets.length; i+=threads) {
+    for (let thread = 0; thread < threads; thread++) {
+      startTransaction(wallets[i+thread])
+    }
     await sleep(interval)
   }
 })()

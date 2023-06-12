@@ -8,7 +8,7 @@ module.exports = {
   dumpConfig: true,
   blockTime: 2 * 1000, // 2s
   machinesRunning: 1,
-  numSlices: 9,
+  numSlices: 1,
   log: {
     winston: {
       opts: {
@@ -20,7 +20,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1000,
+      target: 111,
       increment: {
         enabled: true,
         amount: 200,
@@ -28,7 +28,7 @@ module.exports = {
       },
       check: {
         enabled: true,
-        interval: 1000 * 3 // 3s 
+        interval: 1000 * 10 // 3s 
       }
     },
     etxFreq: 0,
@@ -37,7 +37,7 @@ module.exports = {
     absoluteRandomAddressRatio: 0
   },
   memPool: {
-    max: 4096,
+    max: 12000,
     check: {
       enabled: true,
       interval: 1000 * 3 // 3s
