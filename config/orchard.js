@@ -13,7 +13,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1750,
+      target: 2250,
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 1 // 1hr
@@ -21,6 +21,6 @@ module.exports = {
     }
   },
   memPool: {
-    max: 12000
+    max: 20000
   }
 }
