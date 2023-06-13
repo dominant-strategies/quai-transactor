@@ -171,8 +171,9 @@ async function transact({wallet, nonce} = {}) {
     async function startTransaction(wallet, errorMessage) {
         try {
           if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
-              info("info the fuck")
+              const was = wallet.nonce
               wallet.nonce = await provider.getTransactionCount(wallet.wallet.address, 'pending')
+              warn("wallet nonce reset", {address: wallet.wallet.address, nonce: wallet.nonce, was})
           }
           errorMessage = undefined
           await transact(wallet)
