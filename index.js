@@ -177,7 +177,7 @@ async function transact({wallet, nonce} = {}) {
               warn("wallet nonce reset", {address: wallet.wallet.address, nonce: wallet.nonce, was})
               if (wallet.nonce <= was) {
                   error("got same problematic nonce again", {address: wallet.wallet.address, nonce: wallet.nonce, was})
-                  wallet.nonce = was + 1
+                  // wallet.nonce = was + 1
               }
           }
           errorMessage = undefined
