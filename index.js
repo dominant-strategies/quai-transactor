@@ -169,6 +169,7 @@ async function transact({wallet, nonce} = {}) {
     })
 
     async function startTransaction(wallet, errorMessage) {
+        const start = Date.now()
         try {
           if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
               const was = wallet.nonce
@@ -186,7 +187,7 @@ async function transact({wallet, nonce} = {}) {
             }
         }
         wallet.nonce++
-        setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length)
+        setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length - (Date.now() - start))
     }
 
     const pool = await lookupTxPending(httpProviderUrl)
