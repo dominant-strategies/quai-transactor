@@ -173,7 +173,7 @@ async function transact({wallet, nonce} = {}) {
         if (errorMessage === 'intrinsic gas too low') {
             feeData = await provider.getFeeData()
         } // not an else if so both can be true
-        if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage.includes(it))) {
+        if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
             wallet.nonce = await provider.getTransactionCount(wallet.address, 'pending')
         }
         try {
