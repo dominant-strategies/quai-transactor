@@ -72,7 +72,7 @@ function getRandomInternalAddress() {
     return addresses[Math.floor(Math.random() * addresses.length)]
 }
 
-async function genRawTransaction(nonce) {
+async function genRawTransaction(nonce, double) {
     const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
     const isExternal = Math.random() < etxFreq
 
@@ -92,15 +92,15 @@ async function genRawTransaction(nonce) {
         nonce,
         // gasLimit: feeData.gasPrice,
         gasLimit: 42000,
-        maxFeePerGas: feeData.maxFeePerGas * BigInt(2),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+        maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
         type,
         chainId
     }
     if (isExternal) { // is external this time
         ret.externalGasLimit = BigInt(100000)
-        ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2)
-        ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2)
+        ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
+        ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
     }
     return ret
 }
@@ -113,12 +113,12 @@ function loadLogger(config) {
     debug = log.debug
 }
 
-async function transact({wallet, nonce} = {}) {
+async function transact({wallet, nonce} = {}, double = false) {
     if (queued > memPoolMax / numSlices) {
         nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
-        const raw = await genRawTransaction(nonce)
+        const raw = await genRawTransaction(nonce, double)
         debug('sending transaction', {
             pending,
             queued,
@@ -170,6 +170,7 @@ async function transact({wallet, nonce} = {}) {
 
     async function startTransaction(wallet, errorMessage) {
         const start = Date.now()
+        let double = false
         try {
           if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
               const was = wallet.nonce
@@ -179,9 +180,10 @@ async function transact({wallet, nonce} = {}) {
                   error("got same problematic nonce again", {address: wallet.wallet.address, nonce: wallet.nonce, was})
                   // wallet.nonce = was + 1
               }
+              double = true
           }
           errorMessage = undefined
-          await transact(wallet)
+          await transact(wallet, double)
         } catch (e) {
             error('error sending transaction', e?.error || e)
             errorMessage = e.error?.message || e.message
