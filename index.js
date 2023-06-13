@@ -170,15 +170,15 @@ async function transact({wallet, nonce} = {}) {
     })
 
     async function startTransaction(wallet, errorMessage) {
-        if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
-            info("info the fuck", wallet)
-            warn("WHAT THE FUCK")
-            wallet.nonce = await provider.getTransactionCount(wallet.address, 'pending')
-            warn("nonce too low, resetting", {address: wallet.wallet.address, nonce: wallet.nonce})
-        }
-        errorMessage = undefined
         try {
-            wallet = await transact(wallet)
+          if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
+              info("info the fuck", wallet)
+              warn("WHAT THE FUCK")
+              wallet.nonce = await provider.getTransactionCount(wallet.address, 'pending')
+              warn("nonce too low, resetting", {address: wallet.wallet.address, nonce: wallet.nonce})
+          }
+          errorMessage = undefined
+          wallet = await transact(wallet)
         } catch (e) {
             error('error sending transaction', e?.error || e)
             errorMessage = e.error?.message || e.message
