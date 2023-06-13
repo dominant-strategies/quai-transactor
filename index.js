@@ -171,7 +171,9 @@ async function transact({wallet, nonce} = {}) {
     async function startTransaction(wallet, errorMessage) {
         try {
           if (['replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
-              info("info the fuck", wallet)
+              info("info the fuck", {...wallet})
+              console.log(JSON.stringify(wallet, null, 2))
+              console.log(wallet)
               warn("WHAT THE FUCK")
               wallet.nonce = await provider.getTransactionCount(wallet.address, 'pending')
               warn("nonce too low, resetting", {address: wallet.wallet.address, nonce: wallet.nonce})
