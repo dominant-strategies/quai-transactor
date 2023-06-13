@@ -118,7 +118,7 @@ async function transact({wallet, nonce} = {}) {
         nonce = await provider.getTransactionCount(wallet.address, 'pending')
     }
     if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
-        const raw = await genRawTransaction(nonce++)
+        const raw = await genRawTransaction(nonce)
         debug('sending transaction', {
             pending,
             queued,
@@ -130,7 +130,6 @@ async function transact({wallet, nonce} = {}) {
         await wallet.sendTransaction(raw)
         transactions++
     }
-    return ({wallet, nonce})
 }
 
 ;(async () => {
@@ -178,7 +177,7 @@ async function transact({wallet, nonce} = {}) {
               warn("nonce too low, resetting", {address: wallet.wallet.address, nonce: wallet.nonce})
           }
           errorMessage = undefined
-          wallet = await transact(wallet)
+          await transact(wallet)
         } catch (e) {
             error('error sending transaction', e?.error || e)
             errorMessage = e.error?.message || e.message
@@ -186,7 +185,7 @@ async function transact({wallet, nonce} = {}) {
                 feeData = await provider.getFeeData()
             }
         }
-
+        wallet.nonce++
         setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length)
     }
 
