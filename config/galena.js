@@ -3,14 +3,12 @@
 module.exports = {
   env: 'galena',
   blockTime: 12 * 1000, // 12s
-  machinesRunning: 4,
+  machinesRunning: 6,
   txs: {
     tps: {
-      target: 300,
+      target: 100,
       increment: {
-        enabled: false,
-        amount: 100,
-        interval: 1000 * 60 * 60 * 2 // 2hr
+        enabled: false
       }
     }
   }
