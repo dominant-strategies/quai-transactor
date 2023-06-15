@@ -28,7 +28,7 @@ module.exports = {
       },
       check: {
         enabled: true,
-        interval: 1000 * 3 // 3s 
+        interval: 1000 * 3 // 3s
       }
     },
     etxFreq: 0,
