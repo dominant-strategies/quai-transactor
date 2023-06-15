@@ -19,7 +19,6 @@ module.exports = {
         interval: 1000 * 60 * 60 * 3 // 1hr
       }
     },
-    etxFreq: 0.2
   },
   memPool: {
     max: 20000
