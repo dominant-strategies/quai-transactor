@@ -13,12 +13,13 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 2750,
+      target: 1500,
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 3 // 1hr
       }
-    }
+    },
+    etxFreq: .2,
   },
   memPool: {
     max: 20000
