@@ -25,15 +25,17 @@ npm i
 
 ## Usage
 
+Ensure that the go-quai node is exposing the txpool api on both HTTP and WS.
+
 You can run the script by using the following command.
 
 ```bash
-node index.js --group <your_group> --zone <your_zone> --host <your_host>
+node index.js --group <group_num> --zone zone-<region_num>-<zone_num> --host <your_host>
 ```
 Or you can use the short form of the options:
 
 ```bash
-node index.js -g <your_group> -z <your_zone> -h <your_host>
+node index.js -g <group_num> -z zone-<region_num>-<zone_num> -h <your_host>
 ```
 
 Here is the explanation for each option:
