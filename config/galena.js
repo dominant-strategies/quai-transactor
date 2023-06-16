@@ -9,8 +9,8 @@ module.exports = {
       target: 100,
       increment: {
         enabled: false
-      },
-      etxFreq: 0.1
-    }
+      }
+    },
+    etxFreq: 0.1
   }
 }
