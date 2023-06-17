@@ -6,11 +6,10 @@ module.exports = {
   machinesRunning: 4,
   txs: {
     tps: {
-      target: 400,
+      target: 200,
       increment: {
         enabled: false
-      },
-      etxFreq: 0.1
+      }
     }
   }
 }
