@@ -6,11 +6,14 @@ module.exports = {
   machinesRunning: 6,
   txs: {
     tps: {
-      target: 100,
+      target: 1000,
       increment: {
         enabled: false
       }
     },
-    etxFreq: 0.1
+    etxFreq: .1,
+  },
+  memPool: {
+    max: 12000
   }
 }
