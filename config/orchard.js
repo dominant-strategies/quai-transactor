@@ -13,7 +13,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1500,
+      target: 200,
       increment: {
         amount: 250,
         interval: 1000 * 60 * 60 * 3 // 1hr
