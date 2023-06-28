@@ -11,5 +11,8 @@ module.exports = {
         enabled: false
       }
     },
+  },
+  memPool: {
+    max: 20000
   }
 }
