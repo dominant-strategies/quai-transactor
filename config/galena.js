@@ -13,6 +13,6 @@ module.exports = {
     },
   },
   memPool: {
-    max: 20000
+    max: 12000
   }
 }
