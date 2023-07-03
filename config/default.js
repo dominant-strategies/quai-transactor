@@ -14,7 +14,7 @@ module.exports = {
       opts: {
         name: pkg.name,
         version: pkg.version,
-        level: 'debug'
+        level: 'info'
       }
     }
   },
