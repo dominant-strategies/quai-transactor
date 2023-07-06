@@ -86,16 +86,16 @@ async function genRawTransaction (nonce, double) {
 
   const ret = {
     to,
-    value,
+    value: 10000000000,
     nonce,
-    // gasLimit: feeData.gasPrice,
+    //gasLimit: feeData.gasPrice,
     gasLimit: 42000,
     maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
     type,
     chainId
   }
-  if (isExternal) { // is external this time
+  if (isExternal) {
     ret.externalGasLimit = BigInt(100000)
     ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
     ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))

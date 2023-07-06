@@ -14,13 +14,13 @@ module.exports = {
       opts: {
         name: pkg.name,
         version: pkg.version,
-        level: 'info'
+        level: 'debug'
       }
     }
   },
   txs: {
     tps: {
-      target: 1000,
+      target: 100,
       increment: {
         enabled: true,
         amount: 200,
@@ -31,7 +31,7 @@ module.exports = {
         interval: 1000 * 3 // 3s
       }
     },
-    etxFreq: 0,
+    etxFreq: 1,
     loValue: 1,
     hiValue: 100,
     absoluteRandomAddressRatio: 0
