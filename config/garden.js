@@ -2,7 +2,7 @@
 
 module.exports = {
   env: 'garden',
-  blockTime: 10 * 1000, // 10s
+  blockTime: 3 * 1000, // 3s
   machinesRunning: 4,
   txs: {
     tps: {
