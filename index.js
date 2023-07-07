@@ -147,7 +147,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     wallet.lastSent = Date.now()
     await wallet.sendTransaction(raw)
     transactions++
-    if (transactions >= 1) process.exit(0)
+    if (transactions >= 100) process.exit(0)
   }
 }
 
@@ -261,7 +261,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 100; i++) {
     startTransaction(wallets[i])
     await sleep(interval)
   }
