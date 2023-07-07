@@ -50,7 +50,7 @@ let transactions = 0
 let tps = 0
 let oldTps = 0
 
-const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
+const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone).filter(shard => shard.shard.includes("zone-0"))
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
 
 function getRandomExternalAddress () {
@@ -64,6 +64,7 @@ function getRandomExternalAddress () {
 
 function getRandomInternalAddress () {
   if (Math.random() < generateAbsoluteRandomRatio) {
+    console.log("random")
     return generateRandomAddressInShard(selectedShard)
   }
   const addresses = walletsJson[selectedGroup][selectedZone].map((wallet) => wallet.address)
@@ -84,22 +85,40 @@ async function genRawTransaction (nonce, double) {
     type = 0
   }
 
+  // const ret = {
+  //   to,
+  //   value,
+  //   nonce,
+  //   // gasLimit: feeData.gasPrice,
+  //   gasLimit: 42000,
+  //   maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
+  //   maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
+  //   type,
+  //   chainId
+  // }
+  // if (isExternal) { // is external this time
+  //   ret.externalGasLimit = BigInt(100000)
+  //   ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
+  //   ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
+  // }
   const ret = {
     to,
     value: 10000000000,
     nonce,
-    //gasLimit: feeData.gasPrice,
-    gasLimit: 42000,
+    // gasLimit: feeData.gasPrice,
+    gasLimit: 21000,
     maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
     type,
     chainId
   }
-  if (isExternal) {
-    ret.externalGasLimit = BigInt(100000)
+  if (isExternal) { // is external this time
+    ret.gasLimit = 42000
+    ret.externalGasLimit = BigInt(42000)
     ret.externalGasPrice = feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
     ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1))
   }
+  
   return ret
 }
 
@@ -128,6 +147,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     wallet.lastSent = Date.now()
     await wallet.sendTransaction(raw)
     transactions++
+    if (transactions >= 1) process.exit(0)
   }
 }
 
@@ -143,7 +163,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
+  const walletUsed = walletsJson[selectedGroup][selectedZone]
   interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
@@ -241,7 +261,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (let i = 0; i < wallets.length; i++) {
+  for (let i = 0; i < 1; i++) {
     startTransaction(wallets[i])
     await sleep(interval)
   }

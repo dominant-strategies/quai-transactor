@@ -4,20 +4,57 @@ const Promise = require('bluebird')
 
 const host = 'localhost'
 
-async function getBalance(url, address, blockNumber = "latest") {
+async function getBalance (url, address, number = 'latest') {
+  try {
+   const result = await post(url, {
+     jsonrpc: '2.0',
+     method: 'quai_getBalance',
+     params: [address, number],
+     id: 1
+   })
+  if (result.data?.error) {
+    throw new Error(result.data.error)
+  }
+
+  const balance = result.data?.result
+  return parseInt(balance, 16)
+  } catch (e) {
+     console.log("error")
+    console.log(JSON.stringify(e, null, 2))
+    return await getBalance(url, address, number)
+  }
+}
+
+async function blockNumber (url) {
   const result = await post(url, {
     jsonrpc: '2.0',
-    method: 'quai_getBalance',
-    params: [address, blockNumber],
+    method: 'quai_blockNumber',
+    params: [],
     id: 1
   })
   if (result.data?.error) {
     throw new Error(result.data.error)
   }
 
-  const balance = result.data?.result
+  const hex = result.data?.result
 
-  return parseInt(balance, 16)
+  return parseInt(hex, 16)
+}
+
+async function getBlockByNumber (url, address) {
+  const result = await post(url, {
+    jsonrpc: '2.0',
+    method: 'quai_getBlockByNumber',
+    params: [`0x${address.toString(16)}`, true],
+    id: 1
+  })
+  if (result.data?.error) {
+    throw new Error(result.data.error)
+  }
+
+  const block = result.data?.result
+
+  return block
 }
 
 const nodeData = {
@@ -126,9 +163,9 @@ const networks = {
 
 ;(async () => {
   const numberOfGroups = 1
-  
+
   const wallets = {}
-  Object.keys(nodeData).map( zone => {
+  Object.keys(nodeData).forEach(zone => {
     wallets[zone] = []
   })
 
@@ -138,27 +175,48 @@ const networks = {
     }
   }
 
- console.log("start")
- const start = (await Promise.map(Object.keys(nodeData), async zone => {
-   const port = nodeData[zone].http
+  const start = (await Promise.map(Object.keys(nodeData), async zone => {
+    const port = nodeData[zone].http
 
-   return await Promise.map(wallets[zone], async (wallet, i) => {
-      const balance = await getBalance(`http://${host}:${port}`, wallet.address, "0x1")
+    return await Promise.map(wallets[zone], async (wallet, i) => {
+      const balance = await getBalance(`http://${host}:${port}`, wallet.address, '0x1')
       return balance
-   }).reduce((accum, next) => accum + next, 0)
- }).reduce((accum, next) => accum + next, 0))
- console.log(start)
+    }).reduce((accum, next) => accum + next, 0)
+  }).reduce((accum, next) => accum + next, 0))
+  console.log('start', start)
 
- console.log("end")
- const end = (await Promise.map(Object.keys(nodeData), async zone => {
-   const port = nodeData[zone].http
+  // for every zone
+  const gasUsed = await Promise.map(Object.keys(nodeData), async zone => {
+    const port = nodeData[zone].http
+    const number = await blockNumber(`http://${host}:${port}`)
 
-   return await Promise.map(wallets[zone], async (wallet, i) => {
+    const arr = new Array(number)
+
+
+    // for every block in that zone
+    return await Promise.map(arr, async (wallet, i) => {
+      const block = await getBlockByNumber(`http://${host}:${port}`, i)
+      const txs = block.transactions
+      if (txs.length !== 0) console.log(zone, block, txs.filter(it => it.type !== '0x1').length)
+      
+      // filter type 0 and type 2 and aggregate as follows
+      return txs.filter(it => it.type !== '0x1').map(it => parseInt(it.gas, 16) * (parseInt(it.maxPriorityFeePerGas, 16)+parseInt(block.baseFeePerGas,16))).reduce((accum, next) => accum + next, 0) 
+		   // + txs.filter(it => it.type === '0x2').map(it => parseInt(it.etxGasLimit, 16) * (parseInt(it.etxGasTip, 16)+parseInt(block.baseFeePerGas,16))).reduce((accum, next) => accum + next, 0)
+    }).reduce((accum, next) => accum + Number(next), 0)
+  }).reduce((accum, next) => accum + Number(next), 0)
+
+  console.log('gasUsed', gasUsed)
+
+  const end = (await Promise.map(Object.keys(nodeData), async zone => {
+    const port = nodeData[zone].http
+
+    return await Promise.map(wallets[zone], async (wallet, i) => {
       const balance = await getBalance(`http://${host}:${port}`, wallet.address)
       return balance
-   }).reduce((accum, next) => accum + next, 0)
- }).reduce((accum, next) => accum + next, 0))
- console.log(end)
- console.log(start === end)
- console.log(start - end)
+    }).reduce((accum, next) => accum + next, 0)
+  }).reduce((accum, next) => accum + next, 0))
+  console.log('end', end)
+  console.log(start === end + gasUsed)
+  console.log("start - end: ",start - end)
+  console.log('result: ', start - (end + gasUsed))
 })()
