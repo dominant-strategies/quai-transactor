@@ -198,10 +198,14 @@ const networks = {
       const block = await getBlockByNumber(`http://${host}:${port}`, i)
       const txs = block.transactions
       if (txs.length !== 0) console.log(zone, block, txs.filter(it => it.type !== '0x1').length)
-      
+
+
       // filter type 0 and type 2 and aggregate as follows
+      // type 0: originFee * gas
+      // type 1: already paid; dont do anything
+      // type 2: originFee * gas + destinationFee * destinationGas
       return txs.filter(it => it.type !== '0x1').map(it => parseInt(it.gas, 16) * (parseInt(it.maxPriorityFeePerGas, 16)+parseInt(block.baseFeePerGas,16))).reduce((accum, next) => accum + next, 0) 
-		   // + txs.filter(it => it.type === '0x2').map(it => parseInt(it.etxGasLimit, 16) * (parseInt(it.etxGasTip, 16)+parseInt(block.baseFeePerGas,16))).reduce((accum, next) => accum + next, 0)
+		    + txs.filter(it => it.type === '0x2').map(it => parseInt(it.etxGasLimit, 16) * parseInt(it.etxGasTip, 16)+parseInt(it.etxGasPrice, 16)).reduce((accum, next) => accum + next, 0)
     }).reduce((accum, next) => accum + Number(next), 0)
   }).reduce((accum, next) => accum + Number(next), 0)
 
