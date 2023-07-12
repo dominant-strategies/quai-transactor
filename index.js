@@ -44,8 +44,10 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 const provider = new WebSocketProvider(wsProviderUrl)
 
 let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
-  generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
+  generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps, // initialize atomics
+  freeze
 
+let freezeCount = 0
 let transactions = 0
 let tps = 0
 let oldTps = 0
@@ -177,11 +179,22 @@ async function transact ({ wallet, nonce } = {}, double = false) {
         warn('wallet nonce reset', { address: wallet.wallet.address, nonce: wallet.nonce, was })
         if (wallet.nonce <= was) {
           error('got same problematic nonce again', { address: wallet.wallet.address, nonce: wallet.nonce, was })
+          freezeCount++
+          if (!freeze && freezeCount >= 10) {
+            freeze = true
+            setTimeout(async () => { freeze = false }, blockTime * 3)
+          }
           // wallet.nonce = was + 1
         }
         double = true
       }
       errorMessage = undefined
+      if (freeze) {
+        await sleep(4 * blockTime)
+        const was = wallet.nonce
+        wallet.nonce = await provider.getTransactionCount(wallet.wallet.address, 'pending')
+        warn('wallet nonce reset after freeze', { address: wallet.wallet.address, nonce: wallet.nonce, was })
+      }
       await transact(wallet, double)
     } catch (e) {
       error('error sending transaction', e?.error || e)
@@ -233,6 +246,10 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       feeData = await provider.getFeeData()
     }, config?.feeData.check.interval)
   }
+
+  setInterval(async () => {
+    freezeCount = 0
+  }, blockTime)
 
   if (config?.txs.tps.increment.enabled) {
     setInterval(async () => {

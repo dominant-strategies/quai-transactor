@@ -8,9 +8,9 @@ module.exports = {
     tps: {
       target: 500,
       increment: {
-        enabled: false,
+        enabled: false
       },
-      etxRatio: .1,
+      etxRatio: 0.1
     }
   }
 }
