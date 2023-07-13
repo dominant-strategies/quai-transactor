@@ -43,9 +43,10 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let pending, queued, chainId, latest, feeData, loValue, hiValue, memPoolMax, interval, etxFreq,
+let pending, queued, chainId, latest, loValue, hiValue, memPoolMax, interval, etxFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
+let feeData = {}
 let transactions = 0
 let tps = 0
 let oldTps = 0
@@ -110,6 +111,16 @@ function loadLogger (config) {
   error = log.error
   debug = log.debug
 }
+
+async function updateFeeData(provider) {
+    const newFeeData = await provider.getFeeData()
+    if (newFeeData.maxFeePerGas && ( !feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas))
+      feeData.maxFeePerGas = newFeeData.maxFeePerGas
+    
+    if (newFeeData.maxPriorityFeePerGas && (!feeData?.maxPriorityFeePerGas || newFeeData.maxPriorityFeePerGas  > feeData.maxPriorityFeePerGas))
+      feeData.maxPriorityFeePerGas = newFeeData.maxPriorityFeePerGas
+}
+
 
 async function transact ({ wallet, nonce } = {}, double = false) {
   if (queued > memPoolMax / numSlices) {
@@ -187,7 +198,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       error('error sending transaction', e?.error || e)
       errorMessage = e.error?.message || e.message
       if (errorMessage === 'intrinsic gas too low') {
-        feeData = await provider.getFeeData()
+        await updateFeeData(provider)
       }
     }
     wallet.nonce++
@@ -197,7 +208,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
   queued = pool?.queued
-  feeData = await provider.getFeeData()
+  await updateFeeData(provider)
 
   const start = Date.now()
   latest = start
@@ -230,7 +241,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
 
   if (config?.feeData.check.enabled) {
     setInterval(async () => {
-      feeData = await provider.getFeeData()
+      await updateFeeData(provider)
     }, config?.feeData.check.interval)
   }
 
