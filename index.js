@@ -197,7 +197,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     } catch (e) {
       error('error sending transaction', e?.error || e)
       errorMessage = e.error?.message || e.message
-      if (errorMessage === 'intrinsic gas too low') {
+      if (['transaction underpriced', 'intrinsic gas too low'].some(it => errorMessage?.includes(it))) {
         await updateFeeData(provider)
       }
     }
