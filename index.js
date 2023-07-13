@@ -138,9 +138,11 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       address: wallet.address,
       tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value))
     })
-    wallet.lastSent = Date.now()
-    await wallet.sendTransaction(raw)
-    transactions++
+    if (!freeze) {
+        wallet.lastSent = Date.now()
+        await wallet.sendTransaction(raw)
+        transactions++
+    } else throw new Error("frozen")
   }
 }
 
@@ -184,37 +186,31 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     const start = Date.now()
     let double = false
     try {
-      if (['transaction underpriced', 'replacement transaction underpriced', 'nonce too low'].some(it => errorMessage?.includes(it))) {
+      if (['transaction underpriced', 'replacement transaction underpriced', 'nonce too low', 'frozen'].some(it => errorMessage?.includes(it))) {
         const was = wallet.nonce
         wallet.nonce = await provider.getTransactionCount(wallet.wallet.address, 'pending')
         warn('wallet nonce reset', { address: wallet.wallet.address, nonce: wallet.nonce, was })
         if (wallet.nonce <= was) {
           error('got same problematic nonce again', { address: wallet.wallet.address, nonce: wallet.nonce, was })
-          freezeCount++
-          if (!freeze && freezeCount >= 10) {
-            freeze = true
-            setTimeout(async () => { freeze = false }, blockTime * 3)
-          }
           // wallet.nonce = was + 1
         }
         double = true
       }
       errorMessage = undefined
-      if (freeze) {
-        await sleep(4 * blockTime)
-        const was = wallet.nonce
-        wallet.nonce = await provider.getTransactionCount(wallet.wallet.address, 'pending')
-        warn('wallet nonce reset after freeze', { address: wallet.wallet.address, nonce: wallet.nonce, was })
-      }
       await transact(wallet, double)
+      wallet.nonce++
     } catch (e) {
       error('error sending transaction', e?.error || e)
       errorMessage = e.error?.message || e.message
       if (['transaction underpriced', 'intrinsic gas too low'].some(it => errorMessage?.includes(it))) {
         await updateFeeData(provider)
+        freezeCount++
+        if (!freeze && freezeCount >= 10) {
+          freeze = true
+          setTimeout(async () => { freeze = false }, blockTime * 3)
+        }
       }
     }
-    wallet.nonce++
     setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length - (Date.now() - start))
   }
 
