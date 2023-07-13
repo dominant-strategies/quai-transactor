@@ -194,6 +194,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       }
       errorMessage = undefined
       await transact(wallet, double)
+      wallet.nonce++
     } catch (e) {
       error('error sending transaction', e?.error || e)
       errorMessage = e.error?.message || e.message
@@ -201,7 +202,6 @@ async function transact ({ wallet, nonce } = {}, double = false) {
         await updateFeeData(provider)
       }
     }
-    wallet.nonce++
     setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length - (Date.now() - start))
   }
 
