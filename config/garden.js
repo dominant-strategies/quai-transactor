@@ -10,7 +10,7 @@ module.exports = {
       increment: {
         enabled: false,
       },
-    }
+    },
     etxFreq: .1,
   }
 }
