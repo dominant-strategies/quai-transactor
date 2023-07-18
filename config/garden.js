@@ -1,6 +1,13 @@
 'use strict'
 
 module.exports = {
+  "log": {
+    "winston": {
+      "opts": {
+	"level": "info"
+      }
+    }
+  }
   env: 'garden',
   blockTime: 10 * 1000, // 10s
   machinesRunning: 4,
@@ -10,7 +17,7 @@ module.exports = {
       increment: {
         enabled: false,
       },
-      etxFreq: .1,
     }
+    etxFreq: .1,
   }
 }
