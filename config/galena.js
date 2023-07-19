@@ -2,7 +2,7 @@
 
 module.exports = {
   env: 'galena',
-  blockTime: 12 * 1000, // 12s
+  blockTime: 7 * 1000, // 7s
   machinesRunning: 6,
   txs: {
     tps: {
