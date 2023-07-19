@@ -4,6 +4,13 @@ module.exports = {
   env: 'colosseum',
   blockTime: 12 * 1000, // 10s
   machinesRunning: 3,
+  log: {
+    winston: {
+      opts: {
+        level: 'debug'
+      }
+    }
+  },
   txs: {
     tps: {
       target: 200,

@@ -38,8 +38,10 @@ const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
 const selectedZone = argv.zone
 const host = argv.host
-const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
-const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
+//const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
+//const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
+const wsProviderUrl = `wss://rpc.cyprus1.colosseum.quaiscan.io/ws`
+const httpProviderUrl = `http://rpc.cyprus1.colosseum.quaiscan.io`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
@@ -140,7 +142,9 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     })
     if (!freeze) {
         wallet.lastSent = Date.now()
-        await wallet.sendTransaction(raw)
+        info("# of transactions", {transactions})
+        const ret = await wallet.sendTransaction(raw)
+        console.log(ret)
         transactions++
     } else throw new Error("frozen")
   }
