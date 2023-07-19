@@ -31,7 +31,7 @@ module.exports = {
         interval: 1000 * 3 // 3s
       }
     },
-    etxFreq: 0.5,
+    etxFreq: 0,
     loValue: 1,
     hiValue: 100,
     absoluteRandomAddressRatio: 0
