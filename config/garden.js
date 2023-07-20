@@ -2,11 +2,11 @@
 
 module.exports = {
   env: 'garden',
-  blockTime: 10 * 1000, // 10s
-  machinesRunning: 4,
+  blockTime: 3 * 1000, // 3s
+  machinesRunning: 6,
   txs: {
     tps: {
-      target: 500,
+      target: 1000,
       increment: {
         enabled: false,
       },
