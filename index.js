@@ -3,6 +3,7 @@ const { Wallet, WebSocketProvider } = require('quais')
 const walletsJson = require('./wallets.json')
 const {
   generateRandomAddressInShard,
+  getProviderUrls,
   lookupChainId,
   lookupTxPending,
   nodeData,
@@ -38,8 +39,8 @@ const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
 const selectedZone = argv.zone
 const host = argv.host
-const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
-const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
+
+const { wsProviderUrl, httpProviderUrl } = getProviderUrls(host, selectedZone)
 
 const provider = new WebSocketProvider(wsProviderUrl)
 

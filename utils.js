@@ -157,8 +157,30 @@ function sleep (s) {
   return new Promise((resolve) => setTimeout(resolve, s))
 }
 
+function getProviderUrls(host, zone) {
+    // Regex to check if the host is an IP address
+    const ipRegex = /^(\d{1,3}\.){3,3}\d{1,3}$/;
+    // Regex to check if the host is a localhost
+    const localhostRegex = /^localhost$/;
+
+    let wsProviderUrl, httpProviderUrl;
+
+    if (ipRegex.test(host) || localhostRegex.test(host)) {
+        // Handle IP address and localhost
+        wsProviderUrl = `ws://${host}:${nodeData[zone].ws}`;
+        httpProviderUrl = `http://${host}:${nodeData[zone].http}`;
+    } else {
+        // Handle DNS name
+        wsProviderUrl = `wss://${host}/ws`;
+        httpProviderUrl = `https://${host}`;
+    }
+
+    return { wsProviderUrl, httpProviderUrl };
+}
+
 module.exports = {
   generateRandomAddressInShard,
+  getProviderUrls,
   lookupChainId,
   lookupTxPending,
   nodeData,
