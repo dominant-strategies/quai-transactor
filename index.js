@@ -34,9 +34,11 @@ const argv = yargs(hideBin(process.argv))
   })
   .argv
 
-const groupNumber = argv.group
+const groupNumber = process.env['GROUP'] || argv.group
 const selectedGroup = `group-${groupNumber}`
-const { wsProviderUrl, httpProviderUrl, overwriteZone } = getProviderUrls(argv.host, argv.zone)
+    
+const host = process.env['HOST'] || argv.host
+const { wsProviderUrl, httpProviderUrl, overwriteZone } = getProviderUrls(host, argv.zone)
 const selectedZone = overwriteZone || argv.zone
 
 const provider = new WebSocketProvider(wsProviderUrl)
