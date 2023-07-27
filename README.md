@@ -40,6 +40,6 @@ node index.js -g <group_num> -z zone-<region_num>-<zone_num> -h <your_host>
 
 Here is the explanation for each option:
 
-- `--group, -g: The group that you want to use for the load testing.` Ex. group-0
+- `--group, -g: The group that you want to use for the load testing.` Ex. 0
 - `--zone, -z: The zone that you want to use for the load testing.` Ex. zone-0-0
-- `--host, -h: The hostname of the network provider. If not provided, it defaults to 'localhost'.`
+- `--host, -h: The hostname of the network provider. If not provided, it defaults to 'localhost'.` Ex. localhost 192.168.1.1 rpc.cyprus1.colosseum.quaiscan.io
