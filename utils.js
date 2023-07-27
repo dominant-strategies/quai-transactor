@@ -43,54 +43,63 @@ const nodeData = {
 const QUAI_CONTEXTS = [
   {
     name: 'Cyprus One',
+    nameNumber: 'cyprus1',
     shard: 'zone-0-0',
     context: 2,
     byte: ['0x00', '0x1D']
   },
   {
     name: 'Cyprus Two',
+    nameNumber: 'cyprus2',
     shard: 'zone-0-1',
     context: 2,
     byte: ['0x1E', '0x3A']
   },
   {
     name: 'Cyprus Three',
+    nameNumber: 'cyprus3',
     shard: 'zone-0-2',
     context: 2,
     byte: ['0x3B', '0x57']
   },
   {
     name: 'Paxos One',
+    nameNumber: 'paxos1',
     shard: 'zone-1-0',
     context: 2,
     byte: ['0x58', '0x73']
   },
   {
     name: 'Paxos Two',
+    nameNumber: 'paxos2',
     shard: 'zone-1-1',
     context: 2,
     byte: ['0x74', '0x8F']
   },
   {
     name: 'Paxos Three',
+    nameNumber: 'paxos3',
     shard: 'zone-1-2',
     context: 2,
     byte: ['0x90', '0xAB']
   },
   {
     name: 'Hydra One',
+    nameNumber: 'hydra1',
     shard: 'zone-2-0',
     context: 2,
     byte: ['0xAC', '0xC7']
   },
   {
     name: 'Hydra Two',
+    nameNumber: 'hydra2',
     shard: 'zone-2-1',
     context: 2,
     byte: ['0xC8', '0xE3']
   },
   {
     name: 'Hydra Three',
+    nameNumber: 'hydra3',
     shard: 'zone-2-2',
     context: 2,
     byte: ['0xE4', '0xFF']
@@ -158,6 +167,7 @@ function sleep (s) {
 }
 
 function getProviderUrls(host, zone) {
+    let overwriteZone
     // Regex to check if the host is an IP address
     const ipRegex = /^(\d{1,3}\.){3,3}\d{1,3}$/;
     // Regex to check if the host is a localhost
@@ -173,9 +183,10 @@ function getProviderUrls(host, zone) {
         // Handle DNS name
         wsProviderUrl = `wss://${host}/ws`;
         httpProviderUrl = `https://${host}`;
+        overwriteZone = QUAI_CONTEXTS.find(it => httpProviderUrl.includes(it.nameNumber)).shard
     }
 
-    return { wsProviderUrl, httpProviderUrl };
+    return { wsProviderUrl, httpProviderUrl, overwriteZone };
 }
 
 module.exports = {
@@ -183,7 +194,6 @@ module.exports = {
   getProviderUrls,
   lookupChainId,
   lookupTxPending,
-  nodeData,
   networks,
   sleep,
   QUAI_CONTEXTS

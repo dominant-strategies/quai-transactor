@@ -6,7 +6,6 @@ const {
   getProviderUrls,
   lookupChainId,
   lookupTxPending,
-  nodeData,
   networks,
   sleep,
   QUAI_CONTEXTS
@@ -37,10 +36,8 @@ const argv = yargs(hideBin(process.argv))
 
 const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
-const selectedZone = argv.zone
-const host = argv.host
-
-const { wsProviderUrl, httpProviderUrl } = getProviderUrls(host, selectedZone)
+const { wsProviderUrl, httpProviderUrl, overwriteZone } = getProviderUrls(argv.host, argv.zone)
+const selectedZone = overwriteZone || argv.zone
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
