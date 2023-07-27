@@ -34,10 +34,10 @@ const argv = yargs(hideBin(process.argv))
   })
   .argv
 
-const groupNumber = process.env['GROUP'] || argv.group
+const groupNumber = process.env.GROUP || argv.group
 const selectedGroup = `group-${groupNumber}`
-    
-const host = process.env['HOST'] || argv.host
+
+const host = process.env.HOST || argv.host
 const { wsProviderUrl, httpProviderUrl, overwriteZone } = getProviderUrls(host, argv.zone)
 const selectedZone = overwriteZone || argv.zone
 
@@ -46,7 +46,7 @@ const provider = new WebSocketProvider(wsProviderUrl)
 let pending, queued, chainId, latest, loValue, hiValue, memPoolMax, interval, etxFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps // initialize atomics
 
-let feeData = {}
+const feeData = {}
 let transactions = 0
 let tps = 0
 let oldTps = 0
@@ -112,15 +112,12 @@ function loadLogger (config) {
   debug = log.debug
 }
 
-async function updateFeeData(provider) {
-    const newFeeData = await provider.getFeeData()
-    if (newFeeData.maxFeePerGas && ( !feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas))
-      feeData.maxFeePerGas = newFeeData.maxFeePerGas
-    
-    if (newFeeData.maxPriorityFeePerGas && (!feeData?.maxPriorityFeePerGas || newFeeData.maxPriorityFeePerGas  > feeData.maxPriorityFeePerGas))
-      feeData.maxPriorityFeePerGas = newFeeData.maxPriorityFeePerGas
-}
+async function updateFeeData (provider) {
+  const newFeeData = await provider.getFeeData()
+  if (newFeeData.maxFeePerGas && (!feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas)) { feeData.maxFeePerGas = newFeeData.maxFeePerGas }
 
+  if (newFeeData.maxPriorityFeePerGas && (!feeData?.maxPriorityFeePerGas || newFeeData.maxPriorityFeePerGas > feeData.maxPriorityFeePerGas)) { feeData.maxPriorityFeePerGas = newFeeData.maxPriorityFeePerGas }
+}
 
 async function transact ({ wallet, nonce } = {}, double = false) {
   if (queued > memPoolMax / numSlices) {
