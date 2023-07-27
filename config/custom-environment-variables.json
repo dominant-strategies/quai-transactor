@@ -1,0 +1,47 @@
+{
+  "env": "NODE_APP_ENV",
+  "dumpConfig": "NODE_APP_DUMPCONFIG",
+  "blockTime": "NODE_APP_BLOCKTIME",
+  "machinesRunning": "NODE_APP_MACHINESRUNNING",
+  "numSlices": "NODE_APP_NUMSLICES",
+  "log": {
+    "winston": {
+      "opts": {
+        "name": "NODE_APP_LOG_WINSTON_OPTS_NAME",
+        "version": "NODE_APP_LOG_WINSTON_OPTS_VERSION",
+        "level": "NODE_APP_LOG_WINSTON_OPTS_LEVEL"
+      }
+    }
+  },
+  "txs": {
+    "tps": {
+      "target": "NODE_APP_TXS_TPS_TARGET",
+      "increment": {
+        "enabled": "NODE_APP_TXS_TPS_INCREMENT_ENABLED",
+        "amount": "NODE_APP_TXS_TPS_INCREMENT_AMOUNT",
+        "interval": "NODE_APP_TXS_TPS_INCREMENT_INTERVAL"
+      },
+      "check": {
+        "enabled": "NODE_APP_TXS_TPS_CHECK_ENABLED",
+        "interval": "NODE_APP_TXS_TPS_CHECK_INTERVAL"
+      }
+    },
+    "etxFreq": "NODE_APP_TXS_ETXFREQ",
+    "loValue": "NODE_APP_TXS_LOVALUE",
+    "hiValue": "NODE_APP_TXS_HIVALUE",
+    "absoluteRandomAddressRatio": "NODE_APP_TXS_ABSOLUTERANDOMADDRESSRATIO"
+  },
+  "memPool": {
+    "max": "NODE_APP_MEMPOOL_MAX",
+    "check": {
+      "enabled": "NODE_APP_MEMPOOL_CHECK_ENABLED",
+      "interval": "NODE_APP_MEMPOOL_CHECK_INTERVAL"
+    }
+  },
+  "feeData": {
+    "check": {
+      "enabled": "NODE_APP_FEEDATA_CHECK_ENABLED",
+      "interval": "NODE_APP_FEEDATA_CHECK_INTERVAL"
+    }
+  }
+}
