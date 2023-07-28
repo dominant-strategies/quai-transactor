@@ -2,15 +2,18 @@
 
 module.exports = {
   env: 'garden',
-  blockTime: 10 * 1000, // 10s
-  machinesRunning: 4,
+  blockTime: 7 * 1000, // 7s
+  machinesRunning: 6,
   txs: {
     tps: {
-      target: 500,
+      target: 2000,
       increment: {
         enabled: false
-      },
-      etxRatio: 0.1
-    }
+      }
+    },
+    etxFreq: .1,
+  },
+  memPool: {
+    max: 12000
   }
 }
