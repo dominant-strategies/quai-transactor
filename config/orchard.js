@@ -3,7 +3,7 @@
 module.exports = {
   env: 'orchard',
   blockTime: 2 * 12 * 1000, // 12s
-  machinesRunning: 6,
+  machinesRunning: 4,
   log: {
     winston: {
       opts: {
@@ -13,7 +13,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1000,
+      target: 2000,
       increment: {
         enabled: false,
         amount: 250,
