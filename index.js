@@ -115,12 +115,18 @@ function loadLogger (config) {
 }
 
 async function updateFeeData(provider) {
-    const newFeeData = await provider.getFeeData()
-    if (newFeeData.maxFeePerGas && ( !feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas))
-      feeData.maxFeePerGas = newFeeData.maxFeePerGas
-    
-    if (newFeeData.maxPriorityFeePerGas && (!feeData?.maxPriorityFeePerGas || newFeeData.maxPriorityFeePerGas  > feeData.maxPriorityFeePerGas))
-      feeData.maxPriorityFeePerGas = newFeeData.maxPriorityFeePerGas
+    try {
+        const newFeeData = await provider.getFeeData()
+        if (newFeeData.maxFeePerGas && ( !feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas))
+            feeData.maxFeePerGas = newFeeData.maxFeePerGas
+
+        if (newFeeData.maxPriorityFeePerGas && (!feeData?.maxPriorityFeePerGas || newFeeData.maxPriorityFeePerGas  > feeData.maxPriorityFeePerGas))
+            feeData.maxPriorityFeePerGas = newFeeData.maxPriorityFeePerGas
+    } catch (e)  {
+        error("There was an error getting fee data", e)
+        feeData.maxFeePerGas = 3000000000n
+        feeData.maxPriorityFeePerGas = 1000000000n
+    }
 }
 
 
