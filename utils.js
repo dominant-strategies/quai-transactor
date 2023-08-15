@@ -126,7 +126,7 @@ async function lookupTxPending (url) {
     id: 1
   })
   if (result.data?.error) {
-    throw new Error(result.data.error)
+    throw new Error(result.data?.error)
   }
   const { pending, queued } = result.data.result
 
