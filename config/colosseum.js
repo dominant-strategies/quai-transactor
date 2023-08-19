@@ -11,6 +11,6 @@ module.exports = {
         enabled: false
       }
     },
-    etxFreq: 0.2
+    etxFreq: 0
   }
 }
