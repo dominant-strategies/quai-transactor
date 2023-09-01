@@ -6,7 +6,7 @@ module.exports = {
   machinesRunning: 4,
   txs: {
     tps: {
-      target: 500,
+      target: 1000,
       increment: {
         enabled: false
       }
