@@ -32,12 +32,26 @@ const argv = yargs(hideBin(process.argv))
     default: 'localhost',
     description: 'Host name'
   })
+  .option('count', {
+    alias: 'c',
+    type: 'number',
+    default: '1',
+    description: 'Count'
+  })
+  .option('test', {
+    alias: 't',
+    type: 'number',
+    default: '1',
+    description: 'Test'
+  })
   .argv
 
 const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
 const selectedZone = argv.zone
 const host = argv.host
+const count = argv.count
+const test = argv.test
 const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
 const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
@@ -74,9 +88,10 @@ function getRandomInternalAddress () {
 }
 
 async function genRawTransaction (nonce, double) {
-  const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
+  const value = 100000
   const isExternal = Math.random() < etxFreq
-
+  feeData.maxFeePerGas = 30000000000n
+  feeData.maxPriorityFeePerGas = 10000000000n
   let to, type
 
   if (isExternal) { // is external this time
@@ -103,6 +118,210 @@ async function genRawTransaction (nonce, double) {
     ret.externalGasPrice = feeData.maxFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
     ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
   }
+  
+  switch (test) {
+    case 1:
+      //Expect: status = 1
+        ret.to = getRandomInternalAddress()
+        ret.type =0 
+      break;
+    case 2:
+      //Expect: status = 0
+        ret.to = getRandomInternalAddress()
+        ret.type = 2 
+      break;
+    case 3:
+      //Expect: status = 0 
+        ret.to = getRandomInternalAddress()
+        ret.type = 1 
+      break;
+    case 4:
+      //Expect: status = 1
+        ret.to = getRandomExternalAddress()
+        ret.type = 2 
+      break;
+    case 5:
+      //Expect: status = 0
+        ret.to = getRandomExternalAddress()
+        ret.type = 0 
+      break;
+    case 6:
+      //Expect: status = 0 
+        ret.to = getRandomExternalAddress()
+        ret.type = 1 
+      break;
+    case 7:
+      //Expect: status = 0
+        ret.chainId = 1338 
+      break;
+    case 8:
+      //Expect: status = 0
+        ret.chainId = -2 
+      break;
+    case 9:
+      //Expect: status = 0
+        ret.chainId = BigInt(123481024567190263412039847120893562348905623458902374589)
+      break;
+    case 10:
+      //Expect: status = 0
+        ret.accessList = []
+      break;
+    case 11:
+      //Expect: status = 0
+        ret.data = BigInt(123481024567190263412039847120893562348905623458902374589)
+      break;
+    case 12:
+      //Expect: status = 0
+        ret.data = "dwjdw"
+      break;
+    case 13:
+      //Expect: status = 1
+        ret.data = ""
+      break;
+    case 14:
+      //Expect: status = 0
+        ret.data = ["0xdswd"]
+      break;
+    case 15:
+      //Expect: status = 0
+        ret.gasLimit = -1
+      break;
+    case 16:
+      //Expect: status = 0
+        ret.gasLimit = BigInt(10000000000000000000000000000000000000000000000000000000000)
+      break;
+    case 17:
+      //Expect: status = 0
+        ret.maxPriorityFeePerGas = -1
+      break;
+    case 18:
+      //Expect: status = 0
+        ret.maxPriorityFeePerGas = BigInt(10000000000000000000000000000000000000000000000000000000000)
+      break;
+    case 19:
+      //Expect: status = 0
+        ret.maxFeePerGas = -1
+      break;
+    case 20:
+      //Expect: status = 0
+        ret.maxFeePerGas = BigInt(10000000000000000000000000000000000000000000000000000000000)
+      break;
+    // case 21:
+    //   //Expect: status = 0
+    //     ret.gasFeeCap = -1
+    //   break;
+    // case 22:
+    //   //Expect: status = 0
+    //     ret.gasFeeCap = BigInt(10000000000000000000000000000000000000000000000000000000000)
+    //   break;
+    case 23:
+      //Expect: status = 0
+        ret.value = -1
+      break;
+    case 24:
+      //Expect: status = 0
+        ret.value = BigInt(10000000000000000000000)
+      break;
+    case 25:
+      //Expect: status = 0
+        ret.nonce = -1
+      break;
+    case 26:
+      //Expect: status = 0
+        ret.nonce = 0
+      break;
+    case 27:
+      //Expect: status = 0
+        ret.nonce = 10000000
+      break;
+    case 28:
+      //Expect: status = 0
+        ret.to = 10000000
+      break;
+    case 29:
+      //Expect: status = 0
+        ret.to = nil
+      break;
+    case 30:
+      //Expect: status = 0
+        ret.to = -2039
+      break;
+    case 31:
+      //Expect: status = 0
+        ret.to = "0x1902f834dfb6ec9421783e6333ed99fac9430dc2" 
+      break;
+    case 32:
+      //Expect: status = 0
+        ret.to = "0x1902f834dfb6ec9421783e6333ed99fac9430dc" 
+      break;
+    case 33:
+      //Expect: status = 0
+        ret.to = "0x111902f834dfb6ec9421783e6333ed99fac9430dc" 
+      break;
+    case 34:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasLimit = -10
+      break;
+    case 35:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasLimit = BigInt(100000000000000000000000000000000000)
+      break;
+    case 36:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasPrice = -10
+      break;
+    case 37:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasPrice = BigInt(100000000000000000000000000000000000)
+      break;
+    case 38:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasTip = -10
+      break;
+    case 39:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalGasTip = BigInt(100000000000000000000000000000000000)
+      break;
+    case 40:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.data = BigInt(100000000000000000000000000000000000)
+      break;
+    case 41:
+      //Expect: status = 1
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.data = ""
+      break;
+    case 42:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.data = -1
+      break;
+    case 43:
+      //Expect: status = 0
+        ret.type = 2
+        ret.to = getRandomExternalAddress()
+        ret.externalAccessList = -1
+      break;
+    default:
+      break;
+  }
+
   return ret
 }
 
@@ -131,25 +350,9 @@ async function updateFeeData(provider) {
 
 
 async function transact ({ wallet, nonce } = {}, double = false) {
-  if (queued > memPoolMax / numSlices) {
     nonce = await provider.getTransactionCount(wallet.address, 'pending')
-  }
-  if (pending < memPoolMax && (!wallet?.lastSent || Date.now() - wallet.lastSent > blockTime)) {
     const raw = await genRawTransaction(nonce, double)
-    debug('sending transaction', {
-      pending,
-      queued,
-      nonce,
-      ...feeData,
-      address: wallet.address,
-      tx: JSON.stringify(raw, (key, value) => (typeof value === 'bigint' ? value.toString() : value))
-    })
-    if (!freeze) {
-        wallet.lastSent = Date.now()
-        await wallet.sendTransaction(raw)
-        transactions++
-    } else throw new Error("frozen")
-  }
+    await wallet.sendTransaction(raw)
 }
 
 ;(async () => {
@@ -220,26 +423,8 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length - (Date.now() - start))
   }
 
-  const pool = await lookupTxPending(httpProviderUrl)
-  pending = pool?.pending
-  queued = pool?.queued
-  await updateFeeData(provider)
-
   const start = Date.now()
   latest = start
-
-  const setMemPoolSize = async (n) => {
-    try {
-      const response = await lookupTxPending(httpProviderUrl)
-      pending = (response.pending || response.pending === 0) ? response.pending : pending
-      queued = (response.queued || response.queued === 0) ? response.queued : queued
-      if (pending > memPoolMax) warn('mempool full')
-    } catch (e) {
-      error('error getting mempool size', e)
-      if (n && n < 3) await setMemPoolSize(n + 1)
-    }
-  }
-  if (config?.memPool.check.enabled) setInterval(setMemPoolSize, config?.memPool.check.interval)
 
   if (config?.txs.tps.check.enabled) {
     setInterval(async () => {
@@ -271,7 +456,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       interval = oldTps / targetTps * interval
     }, config?.txs.tps.increment.interval)
   }
-  for (let i = 0; i < wallets.length; i++) {
+  for (let i = 0; i < count; i++) {
     startTransaction(wallets[i])
     await sleep(interval)
   }

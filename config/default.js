@@ -33,7 +33,7 @@ module.exports = {
     },
     etxFreq: 0,
     loValue: 1,
-    hiValue: 100,
+    hiValue: 1000000000000000000000,
     absoluteRandomAddressRatio: 0
   },
   memPool: {
