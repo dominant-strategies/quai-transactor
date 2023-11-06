@@ -11,9 +11,9 @@ module.exports = {
         enabled: false
       }
     },
-    etxFreq: 0.1,
+    etxFreq: 0.01,
   },
   memPool: {
-    max: 24000,
+    max: 12000,
   }
 }
