@@ -3,17 +3,19 @@
 module.exports = {
   env: 'colosseum',
   blockTime: 12 * 1000, // 10s
-  machinesRunning: 2,
+  machinesRunning: 6,
   txs: {
     tps: {
       target: 20,
       increment: {
-        enabled: false
+        enabled: true,
+	amount: 10,
+	interval: 300 * 1000, // 5min
       }
     },
-    etxFreq: 0.1
+    etxFreq: 0
   },
   memPool: {
-    max: 1000,
+    max: 7500,
   }
 }
