@@ -213,7 +213,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
         freezeCount++
         if (!freeze && freezeCount >= 10) {
           freeze = true
-          setTimeout(async () => { freeze = false }, blockTime * 3)
+          setTimeout(async () => { freeze = false }, 3 * 1000)
         }
       }
     }
