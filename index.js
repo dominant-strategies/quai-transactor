@@ -211,10 +211,6 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       if (['transaction underpriced', 'intrinsic gas too low'].some(it => errorMessage?.includes(it))) {
         await updateFeeData(provider)
         freezeCount++
-        if (!freeze && freezeCount >= 10) {
-          freeze = true
-          setTimeout(async () => { freeze = false }, 3 * 1000)
-        }
       }
     }
     setTimeout(() => startTransaction(wallet, errorMessage), interval * wallets.length - (Date.now() - start))
