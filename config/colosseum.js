@@ -16,6 +16,6 @@ module.exports = {
     etxFreq: 0
   },
   memPool: {
-    max: 7500,
+    max: 12000,
   }
 }
