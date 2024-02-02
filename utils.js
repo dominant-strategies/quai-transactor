@@ -3,8 +3,8 @@ const crypto = require('crypto')
 const Promise = require('bluebird')
 const nodeData = {
   'zone-0-0': {
-    http: 8610,
-    ws: 8611
+    http: 9003,
+    ws: 8003
   },
   'zone-0-1': {
     http: 8542,
@@ -107,7 +107,7 @@ const networks = {
 async function lookupChainId (url) {
   const result = await post(url, {
     jsonrpc: '2.0',
-    method: 'eth_chainId',
+    method: 'quai_chainId',
     id: 1
   })
   if (result.data?.error) {
