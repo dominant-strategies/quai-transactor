@@ -7,8 +7,8 @@ module.exports = {
   env: 'default',
   dumpConfig: true,
   blockTime: 2 * 1000, // 2s
-  machinesRunning: 1,
-  numSlices: 9,
+  machinesRunning: 3,
+  numSlices: 1,
   log: {
     winston: {
       opts: {
@@ -20,18 +20,18 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1000,
+      target: 5,
       increment: {
         enabled: true,
-        amount: 200,
-        interval: 1000 * 60 * 60 * 1 // 1hr
+        amount: 10,
+        interval: 1000 * 60 * 60 * 3 // 1hr
       },
       check: {
         enabled: true,
         interval: 1000 * 3 // 3s
       }
     },
-    etxFreq: 0.2,
+    etxFreq: 0.1,
     loValue: 1,
     hiValue: 100,
     absoluteRandomAddressRatio: 0
