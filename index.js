@@ -164,7 +164,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
   memPoolMax = config?.memPool.max
   numSlices = config?.numSlices
   machinesRunning = config?.machinesRunning
-  const walletUsed = walletsJson[selectedGroup][selectedZone].concat(walletsJson[`group-${groupNumber + machinesRunning}`][selectedZone])
+  const walletUsed = walletsJson[selectedGroup][selectedZone]
   interval = 1000 / (targetTps / machinesRunning / numSlices)
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
