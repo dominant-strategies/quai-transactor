@@ -3,40 +3,40 @@ const crypto = require('crypto')
 const Promise = require('bluebird')
 const nodeData = {
   'zone-0-0': {
-    http: 9003,
-    ws: 8003
+    http: 9100,
+    ws: 8100,
   },
   'zone-0-1': {
-    http: 8542,
-    ws: 8643
+    http: 9101,
+    ws: 8101,
   },
   'zone-0-2': {
-    http: 8674,
-    ws: 8675
+    http: 9102,
+    ws: 8102,
   },
   'zone-1-0': {
-    http: 8512,
-    ws: 8613
+    http: 9120,
+    ws: 8120,
   },
   'zone-1-1': {
-    http: 8544,
-    ws: 8645
+    http: 9121,
+    ws: 8121,
   },
   'zone-1-2': {
-    http: 8576,
-    ws: 8677
+    http: 9122,
+    ws: 8122
   },
   'zone-2-0': {
-    http: 8614,
-    ws: 8615
+    http: 9140,
+    ws: 8140
   },
   'zone-2-1': {
-    http: 8646,
-    ws: 8647
+    http: 9141,
+    ws: 8141
   },
   'zone-2-2': {
-    http: 8678,
-    ws: 8679
+    http: 9142,
+    ws: 8142
   }
 }
 
