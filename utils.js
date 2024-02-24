@@ -45,55 +45,55 @@ const QUAI_CONTEXTS = [
     name: 'Cyprus One',
     shard: 'zone-0-0',
     context: 2,
-    byte: ['0x00', '0x1D']
+    byte: ['0x00']
   },
   {
     name: 'Cyprus Two',
     shard: 'zone-0-1',
     context: 2,
-    byte: ['0x1E', '0x3A']
+    byte: ['0x01']
   },
   {
     name: 'Cyprus Three',
     shard: 'zone-0-2',
     context: 2,
-    byte: ['0x3B', '0x57']
+    byte: ['0x02']
   },
   {
     name: 'Paxos One',
     shard: 'zone-1-0',
     context: 2,
-    byte: ['0x58', '0x73']
+    byte: ['0x10']
   },
   {
     name: 'Paxos Two',
     shard: 'zone-1-1',
     context: 2,
-    byte: ['0x74', '0x8F']
+    byte: ['0x11']
   },
   {
     name: 'Paxos Three',
     shard: 'zone-1-2',
     context: 2,
-    byte: ['0x90', '0xAB']
+    byte: ['0x12']
   },
   {
     name: 'Hydra One',
     shard: 'zone-2-0',
     context: 2,
-    byte: ['0xAC', '0xC7']
+    byte: ['0x20']
   },
   {
     name: 'Hydra Two',
     shard: 'zone-2-1',
     context: 2,
-    byte: ['0xC8', '0xE3']
+    byte: ['0x21']
   },
   {
     name: 'Hydra Three',
     shard: 'zone-2-2',
     context: 2,
-    byte: ['0xE4', '0xFF']
+    byte: ['0x22']
   }
 ]
 
