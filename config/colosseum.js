@@ -9,7 +9,7 @@ module.exports = {
       target: 20,
       increment: {
         enabled: true,
-	amount: 10,
+	amount: 4,
 	interval: 300 * 1000, // 5min
       }
     },
