@@ -99,10 +99,11 @@ async function genRawTransaction (nonce, double) {
     chainId
   }
   if (isExternal) { // is external this time
-    ret.externalGasLimit = BigInt(42000)
-    ret.externalGasPrice = feeData.maxFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
-    ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
+    ret.externalGasLimit = BigInt(42000);
+    ret.externalGasPrice = BigInt(feeData.maxFeePerGas) * BigInt(9) * (double ? BigInt(2) : BigInt(1));
+    //ret.externalGasTip = BigInt(feeData.maxPriorityFeePerGas) * BigInt(9) * (double ? BigInt(2) : BigInt(1));
   }
+  
   return ret
 }
 
