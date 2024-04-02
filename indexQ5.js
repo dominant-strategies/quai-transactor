@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { Wallet, WebSocketProvider } = require('quais6')
+const { Wallet, WebSocketProvider } = require('quais')
 const walletsJson = require('./wallets.json')
 const {
   generateRandomAddressInShard,
@@ -93,8 +93,8 @@ async function genRawTransaction (nonce, double) {
     nonce,
     // gasLimit: feeData.gasPrice,
     gasLimit: 42000,
-    //maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
-    //maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
+    maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
+    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
     type,
     chainId
   }
