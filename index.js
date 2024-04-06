@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { Wallet, WebSocketProvider } = require('quais')
+const { Wallet, WebSocketProvider } = require('quais6')
 const walletsJson = require('./wallets.json')
 const {
   generateRandomAddressInShard,
