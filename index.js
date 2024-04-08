@@ -81,27 +81,21 @@ async function genRawTransaction (nonce, double) {
 
   if (isExternal) { // is external this time
     to = getRandomExternalAddress()
-    type = 2
   } else {
     to = getRandomInternalAddress()
-    type = 0
   }
 
   const ret = {
     to,
     value,
     nonce,
-    // gasLimit: feeData.gasPrice,
     gasLimit: 42000,
-    maxFeePerGas: feeData.maxFeePerGas * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
-    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * (double ? BigInt(2) : BigInt(1)),
+    maxFeePerGas: BigInt(feeData.maxFeePerGas) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     type,
     chainId
   }
   if (isExternal) { // is external this time
-    ret.externalGasLimit = BigInt(42000)
-    ret.externalGasPrice = feeData.maxFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
-    ret.externalGasTip = feeData.maxPriorityFeePerGas * BigInt(9) * (double ? BigInt(2) : BigInt(1))
+    ret.gasLimit = BigInt(42000)
   }
   return ret
 }
