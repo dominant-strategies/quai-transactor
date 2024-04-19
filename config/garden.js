@@ -6,7 +6,7 @@ const pkg = require(path.join(__dirname, '..', 'package.json'))
 module.exports = {
   env: 'garden',
   dumpConfig: true,
-  blockTime: 2 * 1000, // 2s
+  blockTime: 10 * 1000, // 2s
   machinesRunning: 3,
   numSlices: 9,
   log: {
