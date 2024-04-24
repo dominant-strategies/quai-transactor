@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "standard": "^17.0.0",
-    "quais6": "file:quais6-v0.1.0-pre.tgz"
+    "quais6": "file:quais6-v0.2.0-pre.tgz"
   }
 }
