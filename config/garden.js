@@ -20,10 +20,10 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 10,
+      target: 500,
       increment: {
         enabled: true,
-        amount: 20,
+        amount: 100,
         interval: 1000 * 60 * 10 // 30 mins
       },
       check: {
