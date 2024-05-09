@@ -96,7 +96,7 @@ async function genRawTransaction (nonce, double) {
     chainId
   }
   if (isExternal) { // is external this time
-    ret.gasLimit = BigInt(42000)
+    ret.gasLimit = BigInt(63000)
   }
   return ret
 }
