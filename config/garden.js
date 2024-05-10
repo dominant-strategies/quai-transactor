@@ -7,7 +7,7 @@ module.exports = {
   env: 'garden',
   dumpConfig: true,
   blockTime: 10 * 1000, // 2s
-  machinesRunning: 3,
+  machinesRunning: 6,
   numSlices: 9,
   log: {
     winston: {
@@ -20,11 +20,11 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 500,
+      target: 1400,
       increment: {
         enabled: true,
         amount: 100,
-        interval: 1000 * 60 * 10 // 30 mins
+        interval: 5000 * 60 * 10 // 30 mins
       },
       check: {
         enabled: true,
