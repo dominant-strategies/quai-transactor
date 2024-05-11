@@ -37,7 +37,7 @@ module.exports = {
     absoluteRandomAddressRatio: 0
   },
   memPool: {
-    max: 4096,
+    max: 12000,
     check: {
       enabled: true,
       interval: 1000 * 3 // 3s
