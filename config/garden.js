@@ -22,7 +22,7 @@ module.exports = {
     tps: {
       target: 2000,
       increment: {
-        enabled: true,
+        enabled: false,
         amount: 100,
         interval: 5000 * 60 * 10 // 30 mins
       },
