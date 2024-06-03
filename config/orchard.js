@@ -1,12 +1,19 @@
 'use strict'
 
+const path = require('path')
+const pkg = require(path.join(__dirname, '..', 'package.json'))
+
 module.exports = {
   env: 'orchard',
-  blockTime: 2 * 12 * 1000, // 12s
-  machinesRunning: 4,
+  dumpConfig: true,
+  blockTime: 10 * 1000, // 2s
+  machinesRunning: 6,
+  numSlices: 9,
   log: {
     winston: {
       opts: {
+        name: pkg.name,
+        version: pkg.version,
         level: 'info'
       }
     }
@@ -16,13 +23,30 @@ module.exports = {
       target: 2000,
       increment: {
         enabled: false,
-        amount: 250,
-        interval: 1000 * 60 * 60 * 3 // 1hr
+        amount: 100,
+        interval: 5000 * 60 * 10 // 30 mins
+      },
+      check: {
+        enabled: true,
+        interval: 1000 * 3 // 3s
       }
     },
-    etxFreq: 0.1
+    etxFreq: 0.1,
+    loValue: 1,
+    hiValue: 100,
+    absoluteRandomAddressRatio: 0
   },
   memPool: {
-    max: 20000
+    max: 12000,
+    check: {
+      enabled: true,
+      interval: 1000 * 3 // 3s
+    }
+  },
+  feeData: {
+    check: {
+      enabled: true,
+      interval: 1000 * 1 // 3s
+    }
   }
 }
