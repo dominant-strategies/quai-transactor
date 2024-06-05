@@ -20,7 +20,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 2000,
+      target: 1000,
       increment: {
         enabled: false,
         amount: 100,
