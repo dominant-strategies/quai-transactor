@@ -6,7 +6,7 @@ const pkg = require(path.join(__dirname, '..', 'package.json'))
 module.exports = {
   env: 'orchard',
   dumpConfig: true,
-  blockTime: 10 * 1000, // 2s
+  blockTime: 12 * 1000, // 2s
   machinesRunning: 6,
   numSlices: 9,
   log: {
@@ -20,10 +20,10 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 1000,
+      target: 500,
       increment: {
-        enabled: false,
-        amount: 100,
+        enabled: true,
+        amount: 50,
         interval: 5000 * 60 * 10 // 30 mins
       },
       check: {
