@@ -3,12 +3,12 @@
 module.exports = {
   env: 'colosseum',
   blockTime: 12 * 1000, // 10s
-  machinesRunning: 6,
+  machinesRunning: 1,
   txs: {
     tps: {
-      target: 20,
+      target: 100,
       increment: {
-        enabled: true,
+        enabled: false,
 	amount: 10,
 	interval: 300 * 1000, // 5min
       }
