@@ -94,12 +94,30 @@ async function genRawTransaction (nonce, double) {
     maxPriorityFeePerGas: BigInt(42000)* (double ? BigInt(2) : BigInt(1)),
     type,
     chainId,
-    data: Date.now().toString()
+    data: timeStampBytes(BigInt(Date.now())),
   }
   if (isExternal) { // is external this time
     ret.gasLimit = BigInt(63000)
   }
   return ret
+}
+
+function timeStampBytes(timestamp) {
+  // Ensure the timestamp is a BigInt
+  const bigIntTimestamp = BigInt(timestamp);
+  const res = new Uint8Array(8);
+
+  // Perform bitwise operations to extract each byte in big-endian order
+  res[0] = Number((bigIntTimestamp >> 56n) & 0xffn);
+  res[1] = Number((bigIntTimestamp >> 48n) & 0xffn);
+  res[2] = Number((bigIntTimestamp >> 40n) & 0xffn);
+  res[3] = Number((bigIntTimestamp >> 32n) & 0xffn);
+  res[4] = Number((bigIntTimestamp >> 24n) & 0xffn);
+  res[5] = Number((bigIntTimestamp >> 16n) & 0xffn);
+  res[6] = Number((bigIntTimestamp >> 8n) & 0xffn);
+  res[7] = Number(bigIntTimestamp & 0xffn);
+
+  return res;
 }
 
 function loadLogger (config) {
