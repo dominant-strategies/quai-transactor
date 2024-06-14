@@ -93,7 +93,8 @@ async function genRawTransaction (nonce, double) {
     maxFeePerGas: BigInt(feeData.maxFeePerGas) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     maxPriorityFeePerGas: BigInt(42000)* (double ? BigInt(2) : BigInt(1)),
     type,
-    chainId
+    chainId,
+    data: Date.now().toString()
   }
   if (isExternal) { // is external this time
     ret.gasLimit = BigInt(63000)
