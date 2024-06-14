@@ -85,6 +85,8 @@ async function genRawTransaction (nonce, double) {
     to = getRandomInternalAddress()
   }
 
+  console.log("date now", Date.now())
+
   const ret = {
     to,
     value,
@@ -94,12 +96,38 @@ async function genRawTransaction (nonce, double) {
     maxPriorityFeePerGas: BigInt(42000)* (double ? BigInt(2) : BigInt(1)),
     type,
     chainId,
-    data: Date.now().toString()
+    data: stringToBase64Bytes(Date.now().toString()),
   }
   if (isExternal) { // is external this time
     ret.gasLimit = BigInt(63000)
   }
   return ret
+}
+
+function timeStampBytes(timestamp) {
+  const res = new Uint8Array(8);
+  res[0] = timestamp >> 56;
+  res[1] = (timestamp >> 48) & 0xff;
+  res[2] = (timestamp >> 40) & 0xff;
+  res[3] = (timestamp >> 32) & 0xff;
+  res[4] = (timestamp >> 24) & 0xff;
+  res[5] = (timestamp >> 16) & 0xff;
+  res[6] = (timestamp >> 8) & 0xff;
+  res[7] = timestamp & 0xff;
+  return res;
+}
+
+function stringToBase64Bytes(str) {
+  const base64Str = btoa(str);
+  const binaryStr = atob(base64Str);
+  const len = binaryStr.length;
+  const bytes = new Uint8Array(len);
+
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
+  }
+
+  return bytes;
 }
 
 function loadLogger (config) {
