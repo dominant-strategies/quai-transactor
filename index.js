@@ -78,6 +78,7 @@ async function genRawTransaction (nonce, double) {
   const isExternal = Math.random() < etxFreq
 
   let to, type
+  let data
 
   if (isExternal) { // is external this time
     to = getRandomExternalAddress()
@@ -94,10 +95,11 @@ async function genRawTransaction (nonce, double) {
     maxPriorityFeePerGas: BigInt(42000)* (double ? BigInt(2) : BigInt(1)),
     type,
     chainId,
-    data: timeStampBytes(BigInt(Date.now())),
   }
   if (isExternal) { // is external this time
     ret.gasLimit = BigInt(63000)
+  } else {
+    ret.data = timeStampBytes(BigInt(Date.now()))
   }
   return ret
 }
