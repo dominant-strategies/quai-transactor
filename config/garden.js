@@ -20,7 +20,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 4000,
+      target: 9000,
       increment: {
         enabled: false,
         amount: 100,
@@ -37,7 +37,7 @@ module.exports = {
     absoluteRandomAddressRatio: 0
   },
   memPool: {
-    max: 12000,
+    max: 20000,
     check: {
       enabled: true,
       interval: 1000 * 3 // 3s
