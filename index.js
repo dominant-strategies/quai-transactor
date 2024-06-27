@@ -1,6 +1,7 @@
 const Promise = require('bluebird')
 const { Wallet, WebSocketProvider, getZoneForAddress } = require('quais')
 const walletsJson = require('./wallets.json')
+const qiJson = require('./qikeys.json')
 const {
   generateRandomAddressInShard,
   lookupChainId,
@@ -43,7 +44,7 @@ const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
 const provider = new WebSocketProvider(wsProviderUrl)
 
-let pending, queued, chainId, latest, loValue, hiValue, memPoolMax, interval, etxFreq,
+let pending, queued, chainId, latest, loValue, hiValue, memPoolMax, interval, etxFreq, convFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps, // initialize atomics
   freeze
 
@@ -55,6 +56,23 @@ let oldTps = 0
 
 const externalShards = QUAI_CONTEXTS.filter((shard) => shard.shard !== selectedZone)
 const selectedShard = QUAI_CONTEXTS.find((shard) => shard.shard === selectedZone)
+
+function getRandomQiAddress() {
+  // Ensure the selected shard is an array before using map
+  const wallets = qiJson[selectedGroup][selectedZone];
+  if (!Array.isArray(wallets)) {
+    throw new Error(`Selected shard '${selectedShard}' in group '${selectedGroup}' is not an array`);
+  }
+
+  // Map wallet addresses
+  const addresses = wallets.map(wallet => wallet.address);
+  if (addresses.length === 0) {
+    throw new Error("No addresses found in the selected shard");
+  }
+
+  // Return a random address
+  return addresses[Math.floor(Math.random() * addresses.length)];
+}
 
 function getRandomExternalAddress () {
   const randomZone = externalShards[Math.floor(Math.random() * externalShards.length)]
@@ -76,14 +94,18 @@ function getRandomInternalAddress () {
 async function genRawTransaction (nonce, double) {
   const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   const isExternal = Math.random() < etxFreq
+  const isConversion = !isExternal && (Math.random() < convFreq)
 
   let to, type
-  let data
 
   if (isExternal) { // is external this time
     to = getRandomExternalAddress()
   } else {
-    to = getRandomInternalAddress()
+    if (isConversion) {
+      to = getRandomQiAddress()
+    } else {
+      to = getRandomInternalAddress()
+    }
   }
 
   const ret = {
@@ -186,6 +208,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
   loValue = config?.txs.loValue
   hiValue = config?.txs.hiValue
   etxFreq = config?.txs.etxFreq
+  convFreq = config?.txs.convFreq
   generateAbsoluteRandomRatio = config?.txs.absoluteRandomAddressRatio
   blockTime = config?.blockTime
 

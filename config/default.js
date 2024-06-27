@@ -32,6 +32,7 @@ module.exports = {
       }
     },
     etxFreq: 0.1,
+    convFreq: 0.1,
     loValue: 1,
     hiValue: 100,
     absoluteRandomAddressRatio: 0
