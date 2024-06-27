@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { Wallet, WebSocketProvider } = require('quais6')
+const { Wallet, WebSocketProvider, getZoneForAddress } = require('quais')
 const walletsJson = require('./wallets.json')
 const {
   generateRandomAddressInShard,
@@ -130,9 +130,9 @@ function loadLogger (config) {
   debug = log.debug
 }
 
-async function updateFeeData(provider) {
+async function updateFeeData(provider, zone) {
     try {
-        const newFeeData = await provider.getFeeData()
+        const newFeeData = await provider.getFeeData(zone)
         if (newFeeData.maxFeePerGas && ( !feeData?.maxFeePerGas || newFeeData.maxFeePerGas > feeData.maxFeePerGas))
             feeData.maxFeePerGas = newFeeData.maxFeePerGas
 
@@ -162,6 +162,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
     })
     if (!freeze) {
         wallet.lastSent = Date.now()
+        raw.from = wallet.address
         await wallet.sendTransaction(raw)
         transactions++
     } else throw new Error("frozen")
@@ -225,7 +226,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
       error('error sending transaction', e?.error || e)
       errorMessage = e.error?.message || e.message
       if (['transaction underpriced', 'intrinsic gas too low'].some(it => errorMessage?.includes(it))) {
-        await updateFeeData(provider)
+        await updateFeeData(provider, getZoneForAddress(wallet.wallet.address))
         freezeCount++
       }
     }
@@ -235,7 +236,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
   const pool = await lookupTxPending(httpProviderUrl)
   pending = pool?.pending
   queued = pool?.queued
-  await updateFeeData(provider)
+  await updateFeeData(provider, getZoneForAddress(wallets[0].wallet.address))
 
   const start = Date.now()
   latest = start
@@ -268,7 +269,7 @@ async function transact ({ wallet, nonce } = {}, double = false) {
 
   if (config?.feeData.check.enabled) {
     setInterval(async () => {
-      await updateFeeData(provider)
+      await updateFeeData(provider, getZoneForAddress(wallets[0].wallet.address))
     }, config?.feeData.check.interval)
   }
 

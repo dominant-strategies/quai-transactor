@@ -102,7 +102,7 @@ const networks = {
   9000: 'colosseum',
   12000: 'garden',
   15000: 'orchard',
-  17000: 'galena'
+  17000: 'lighthouse'
 }
 async function lookupChainId (url) {
   const result = await post(url, {
