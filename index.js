@@ -92,19 +92,22 @@ function getRandomInternalAddress () {
 }
 
 async function genRawTransaction (nonce, double) {
-  const value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   const isExternal = Math.random() < etxFreq
   const isConversion = !isExternal && (Math.random() < convFreq)
 
   let to, type
+  let value
 
   if (isExternal) { // is external this time
     to = getRandomExternalAddress()
+    value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
   } else {
     if (isConversion) {
       to = getRandomQiAddress()
+      value = 100000000000
     } else {
       to = getRandomInternalAddress()
+      value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
     }
   }
 
@@ -112,7 +115,7 @@ async function genRawTransaction (nonce, double) {
     to,
     value,
     nonce,
-    gasLimit: 42000,
+    gasLimit: 100000,
     maxFeePerGas: BigInt(feeData.maxFeePerGas) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     maxPriorityFeePerGas: BigInt(42000)* (double ? BigInt(2) : BigInt(1)),
     type,
