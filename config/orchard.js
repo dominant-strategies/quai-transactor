@@ -7,8 +7,8 @@ module.exports = {
   env: 'orchard',
   dumpConfig: true,
   blockTime: 12 * 1000, // 2s
-  machinesRunning: 6,
-  numSlices: 9,
+  machinesRunning: 30,
+  numSlices: 1,
   log: {
     winston: {
       opts: {
@@ -20,7 +20,7 @@ module.exports = {
   },
   txs: {
     tps: {
-      target: 2000,
+      target: 100,
       increment: {
         enabled: false,
         amount: 50,
