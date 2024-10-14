@@ -104,7 +104,7 @@ async function genRawTransaction (nonce, double) {
   } else {
     if (isConversion) {
       to = getRandomQiAddress()
-      value = 100000000000
+      value = BigInt(1000000000000000000000)
     } else {
       to = getRandomInternalAddress()
       value = Math.floor(Math.random() * (hiValue - loValue + 1) + loValue)
