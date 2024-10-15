@@ -13,7 +13,7 @@
     "bluebird": "^3.7.2",
     "config": "^3.3.9",
     "path": "^0.12.7",
-    "quais": "1.2.0-pre",
+    "quais": "1.0.0-alpha.17",
     "winston": "^3.8.2",
     "yargs": "^17.7.2"
   }
