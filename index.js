@@ -116,8 +116,8 @@ async function genRawTransaction (nonce, double) {
     value,
     nonce,
     gasLimit: 100000,
-    gasPrice: BigInt(10000000000000) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
-    minerTip: BigInt(1000000)* (double ? BigInt(2) : BigInt(1)),
+    // gasPrice: BigInt(10000000000000) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
+    // minerTip: BigInt(1000000)* (double ? BigInt(2) : BigInt(1)),
     type,
     chainId,
   }
