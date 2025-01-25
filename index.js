@@ -39,10 +39,10 @@ const groupNumber = argv.group
 const selectedGroup = `group-${groupNumber}`
 const selectedZone = argv.zone
 const host = argv.host
-const wsProviderUrl = `ws://${host}:${nodeData[selectedZone].ws}`
+const wsProviderUrl = `ws://${host}`
 const httpProviderUrl = `http://${host}:${nodeData[selectedZone].http}`
 
-const provider = new WebSocketProvider(wsProviderUrl)
+const provider = new WebSocketProvider(wsProviderUrl, undefined, { usePathing : false })
 
 let pending, queued, chainId, latest, loValue, hiValue, memPoolMax, interval, etxFreq, convFreq,
   generateAbsoluteRandomRatio, info, debug, warn, error, machinesRunning, numSlices, blockTime, targetTps, // initialize atomics
@@ -115,11 +115,10 @@ async function genRawTransaction (nonce, double) {
     to,
     value,
     nonce,
-    gasLimit: 500000,
+    gasLimit: 42000,
     // gasPrice: BigInt(10000000000000) * BigInt(2) * (double ? BigInt(2) : BigInt(1)),
     // minerTip: BigInt(1000000)* (double ? BigInt(2) : BigInt(1)),
     type,
-    chainId,
   }
   if (isExternal) { // is external this time
     ret.gasLimit = BigInt(63000)
